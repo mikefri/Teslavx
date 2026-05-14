@@ -3,46 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Lecteur Privé</title>
+    <title>Mon Lecteur Premium</title>
     
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <meta name="referrer" content="no-referrer">
 
     <style>
-        body { font-family: sans-serif; background: #121212; color: white; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: white; margin: 0; display: flex; flex-direction: column; height: 100vh; }
         
         /* Zone du lecteur */
-        #player-container { 
-            background: #000; 
-            width: 100%; 
-            aspect-ratio: 16/9; 
-            max-height: 60vh; 
-            position: relative;
-        }
+        #player-container { background: #000; width: 100%; aspect-ratio: 16/9; max-height: 60vh; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         iframe { width: 100%; height: 100%; border: none; }
 
-        .btn-fallback {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #ff0000;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            display: none;
-        }
+        .btn-fallback { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: #ff0000; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: none; z-index: 10; }
 
-        /* Zone Playlist */
-        #playlist { padding: 20px; overflow-y: auto; flex-grow: 1; }
+        /* Contenu */
+        #content-area { padding: 20px; overflow-y: auto; flex-grow: 1; }
+        
+        .search-bar { width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 25px; border: none; background: #252525; color: white; font-size: 1rem; box-sizing: border-box; }
+
+        h2 { border-left: 4px solid #007bff; padding-left: 10px; margin-top: 30px; font-size: 1.2em; color: #aaa; }
+
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
-        .card { background: #1e1e1e; cursor: pointer; border-radius: 5px; overflow: hidden; font-size: 0.8em; transition: 0.2s; }
-        .card:hover { transform: scale(1.05); background: #252525; }
-        .card img { width: 100%; height: 100px; object-fit: cover; }
-        .card-info { padding: 8px; }
-        .active { border: 2px solid #007bff; }
+        
+        /* Cartes */
+        .card { background: #1e1e1e; cursor: pointer; border-radius: 8px; overflow: hidden; font-size: 0.8em; transition: 0.2s; position: relative; border: 1px solid #333; }
+        .card:hover { transform: translateY(-5px); background: #282828; border-color: #007bff; }
+        .card img { width: 100%; height: 100px; object-fit: cover; display: block; }
+        .card-info { padding: 8px; line-height: 1.3; }
+        .active { border: 2px solid #007bff; background: #1a2635; }
+
+        /* Bouton Favoris */
+        .fav-btn { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 1.2em; display: flex; align-items: center; justify-content: center; transition: 0.2s; z-index: 5; }
+        .fav-btn:hover { background: #ff0000; transform: scale(1.1); }
+        .is-fav { color: #ff0000 !important; }
     </style>
 </head>
 <body>
@@ -52,67 +46,113 @@
         <a id="fallback-button" href="#" target="_blank" class="btn-fallback">Ouvrir sur le site source</a>
     </div>
 
-    <div id="playlist">
-        <h2>Ma Playlist Automatique</h2>
+    <div id="content-area">
+        <input type="text" id="search" class="search-bar" placeholder="Rechercher une vidéo...">
+
+        <div id="favorites-section" style="display:none;">
+            <h2>⭐ Ma Playlist (Favoris)</h2>
+            <div id="fav-gallery" class="grid"></div>
+        </div>
+
+        <h2>🎬 Toutes les Vidéos</h2>
         <div id="gallery" class="grid">Chargement en cours...</div>
     </div>
 
     <script>
         const playerContainer = document.getElementById('player-container');
         const fallbackBtn = document.getElementById('fallback-button');
-        let localVideoData = []; // Stockage local des données reçues du JSON
+        const searchInput = document.getElementById('search');
+        
+        let localVideoData = []; 
+        let favorites = JSON.parse(localStorage.getItem('myPlaylist')) || [];
 
-function playVideo(index, element) {
-    const video = localVideoData[index];
-    if (!video || !video.embed_url) return;
+        // --- FONCTIONS ---
 
-    // ASTUCE : On remplace le domaine principal par le sous-domaine de secours de XVideos
-    // Cela permet souvent de contourner la sécurité SAMEORIGIN bloquée par GitHub
-    let bypassUrl = video.embed_url.replace('www.xvideos.com', 'static-controls.xvideos.com');
-    
-    console.log("Tentative de bypass sur :", bypassUrl);
-    
-    playerContainer.innerHTML = `
-        <iframe src="${bypassUrl}" 
-                width="100%" height="100%" 
-                frameborder="0" 
-                allowfullscreen 
-                allow="autoplay; fullscreen; picture-in-picture">
-        </iframe>`;
-    
-    // On garde le bouton au cas où, mais masqué si ça fonctionne
-    playerContainer.appendChild(fallbackBtn);
-    fallbackBtn.href = video.link;
-    fallbackBtn.style.display = "block"; 
-    
-    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
-    element.classList.add('active');
-    window.scrollTo({top: 0, behavior: 'smooth'});
-}
+        function playVideo(video, element) {
+            if (!video || !video.embed_url) return;
 
-        // On va chercher le fichier data.json mis à jour par GitHub Actions
+            let bypassUrl = video.embed_url.replace('www.xvideos.com', 'static-controls.xvideos.com');
+            
+            playerContainer.innerHTML = `
+                <iframe src="${bypassUrl}" frameborder="0" allowfullscreen allow="autoplay; fullscreen"></iframe>`;
+            
+            playerContainer.appendChild(fallbackBtn);
+            fallbackBtn.href = video.link;
+            fallbackBtn.style.display = "block"; 
+            
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+            if(element) element.classList.add('active');
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function toggleFavorite(e, video) {
+            e.stopPropagation(); // Empêche de lancer la vidéo quand on clique sur l'étoile
+            const index = favorites.findIndex(v => v.embed_url === video.embed_url);
+            
+            if (index > -1) {
+                favorites.splice(index, 1);
+            } else {
+                favorites.push(video);
+            }
+            
+            localStorage.setItem('myPlaylist', JSON.stringify(favorites));
+            renderGalleries();
+        }
+
+        function renderGalleries() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const gallery = document.getElementById('gallery');
+            const favGallery = document.getElementById('fav-gallery');
+            const favSection = document.getElementById('favorites-section');
+
+            // Playlist (Favoris)
+            favGallery.innerHTML = '';
+            if (favorites.length > 0) {
+                favSection.style.display = 'block';
+                favorites.forEach((v) => {
+                    favGallery.appendChild(createCard(v, true));
+                });
+            } else {
+                favSection.style.display = 'none';
+            }
+
+            // Galerie principale filtrée
+            gallery.innerHTML = '';
+            const filtered = localVideoData.filter(v => v.title.toLowerCase().includes(searchTerm));
+            filtered.forEach((v) => {
+                gallery.appendChild(createCard(v));
+            });
+        }
+
+        function createCard(video, isFromFav = false) {
+            const isFav = favorites.some(fav => fav.embed_url === video.embed_url);
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <button class="fav-btn ${isFav ? 'is-fav' : ''}" title="Ajouter aux favoris">
+                    ${isFav ? '❤️' : '🤍'}
+                </button>
+                <img src="${video.thumb}" loading="lazy">
+                <div class="card-info">${video.title.substring(0, 50)}...</div>
+            `;
+            
+            card.querySelector('.fav-btn').onclick = (e) => toggleFavorite(e, video);
+            card.onclick = () => playVideo(video, card);
+            return card;
+        }
+
+        // --- Lancement ---
+
+        searchInput.oninput = renderGalleries;
+
         fetch('data.json')
             .then(res => res.json())
             .then(data => {
-                localVideoData = data; // On garde les données en mémoire
-                const gallery = document.getElementById('gallery');
-                gallery.innerHTML = '';
-                
-                // On génère la liste en passant l'index (0, 1, 2...) à la fonction de lecture
-                data.forEach((v, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <img src="${v.thumb}" loading="lazy">
-                        <div class="card-info">${v.title.substring(0, 45)}...</div>
-                    `;
-                    card.onclick = () => playVideo(index, card);
-                    gallery.appendChild(card);
-                });
+                localVideoData = data;
+                renderGalleries();
             })
             .catch(err => {
-                document.getElementById('gallery').innerHTML = "Erreur : data.json introuvable ou mal formé.";
-                console.error(err);
+                document.getElementById('gallery').innerHTML = "Erreur de chargement des données.";
             });
     </script>
 </body>
