@@ -429,7 +429,9 @@ function playVideo(video, cardEl, fromQueue = false) {
     if (existing) existing.remove();
 
     const iframe = document.createElement('iframe');
-    iframe.src = video.embed_url.replace('www.xvideos.com', 'static-controls.xvideos.com');
+    let src = video.embed_url.replace('www.xvideos.com', 'static-controls.xvideos.com');
+    src += (src.includes('?') ? '&' : '?') + 'autoplay=1';
+    iframe.src = src;
     iframe.allowFullscreen = true;
     iframe.allow = 'autoplay; fullscreen';
     wrap.insertBefore(iframe, wrap.firstChild);
