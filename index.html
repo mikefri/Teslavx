@@ -62,19 +62,22 @@
         const fallbackBtn = document.getElementById('fallback-button');
         let localVideoData = []; // Stockage local des données reçues du JSON
 
-        function playVideo(index, element) {
-            const video = localVideoData[index];
-            if (!video || !video.embed_url) return;
+function playVideo(index, element) {
+    const video = localVideoData[index];
+    if (!video || !video.embed_url) return;
 
-            console.log("Lecture du lien fourni par le bot :", video.embed_url);
-            
-            // On injecte directement l'iframe pré-générée par Python
-            playerContainer.innerHTML = `
-                <iframe src="${video.embed_url}" 
-                        frameborder="0" 
-                        allowfullscreen 
-                        allow="autoplay; fullscreen; picture-in-picture">
-                </iframe>`;
+    // ASTUCE : On change l'extension du domaine pour bypasser certains filtres
+    // On passe de .com à .net ou on utilise leur domaine de secours
+    let forceUrl = video.embed_url.replace('www.xvideos.com', 'static-controls.xvideos.com');
+    
+    playerContainer.innerHTML = `
+        <iframe src="${forceUrl}" 
+                width="100%" height="100%" 
+                frameborder="0" 
+                allowfullscreen 
+                sandbox="allow-forms allow-scripts allow-same-origin"
+                allow="autoplay; fullscreen">
+        </iframe>`;
             
             // On replace le bouton de secours au cas où le site bloque l'affichage statique
             playerContainer.appendChild(fallbackBtn);
