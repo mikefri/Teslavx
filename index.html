@@ -37,13 +37,23 @@ function playVideo(url, element) {
     const playerContainer = document.getElementById('player-container');
     let embedUrl = "";
 
+    if (!url) return;
+
+    // On s'assure que l'URL commence bien par https
+    url = url.replace("http://", "https://");
+
     try {
         if (url.includes('xvideos.com')) {
-            // Cette regex capture tout ce qui se trouve entre 'video.' ou 'video' et le prochain '/'
-            // Elle fonctionnera pour "video.okfvaldfd69" ou "video12345"
+            // Cette nouvelle regex isole plus précisément l'ID après 'video.' ou 'video'
+            // en s'arrêtant dès qu'elle croise un slash ou le mot 'home'
             const match = url.match(/video\.?([^/]+)/);
             if (match && match[1]) {
-                embedUrl = `https://www.xvideos.com/embedframe/${match[1]}`;
+                let videoId = match[1];
+                // Si l'ID contient un point (ex: okfval.69), on le garde tel quel
+                // Mais on nettoie si la regex a pris trop de texte
+                if (videoId.includes('home')) videoId = videoId.split('/')[0];
+                
+                embedUrl = `https://www.xvideos.com/embedframe/${videoId}`;
             }
         } 
         else if (url.includes('xhamster.com')) {
@@ -54,12 +64,17 @@ function playVideo(url, element) {
         }
 
         if (embedUrl !== "") {
-            console.log("Lecture de l'embed :", embedUrl);
+            // On force le HTTPS ici aussi pour éviter le Mixed Content
+            embedUrl = embedUrl.replace("http://", "https://");
+            
+            console.log("Tentative de lecture sécurisée :", embedUrl);
+            
             playerContainer.innerHTML = `
                 <iframe src="${embedUrl}" 
                         width="100%" height="100%" 
                         frameborder="0" scrolling="no" 
-                        allowfullscreen="true">
+                        allowfullscreen="true"
+                        allow="autoplay; fullscreen">
                 </iframe>`;
             
             document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
@@ -69,7 +84,7 @@ function playVideo(url, element) {
             window.open(url, '_blank');
         }
     } catch (err) {
-        console.error(err);
+        console.error("Erreur :", err);
         window.open(url, '_blank');
     }
 }
