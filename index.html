@@ -32,7 +32,7 @@
             text-decoration: none;
             border-radius: 5px;
             font-weight: bold;
-            display: none; /* Caché par défaut */
+            display: none;
         }
 
         /* Zone Playlist */
@@ -60,52 +60,56 @@
     <script>
         const playerContainer = document.getElementById('player-container');
         const fallbackBtn = document.getElementById('fallback-button');
+        let localVideoData = []; // Stockage local des données reçues du JSON
 
-function playVideo(index, element) {
-    // On récupère les données directement depuis notre liste JSON chargée
-    const video = videoData[index]; 
-    const playerContainer = document.getElementById('player-container');
-    const fallbackBtn = document.getElementById('fallback-button');
+        function playVideo(index, element) {
+            const video = localVideoData[index];
+            if (!video || !video.embed_url) return;
 
-    if (video.embed_url) {
-        playerContainer.innerHTML = `
-            <iframe src="${video.embed_url}" 
-                    width="100%" height="100%" 
-                    frameborder="0" allowfullscreen 
-                    allow="autoplay; fullscreen">
-            </iframe>`;
-        
-        // Bouton de secours
-        playerContainer.appendChild(fallbackBtn);
-        fallbackBtn.href = video.link;
-        fallbackBtn.style.display = "block";
+            console.log("Lecture du lien fourni par le bot :", video.embed_url);
+            
+            // On injecte directement l'iframe pré-générée par Python
+            playerContainer.innerHTML = `
+                <iframe src="${video.embed_url}" 
+                        frameborder="0" 
+                        allowfullscreen 
+                        allow="autoplay; fullscreen; picture-in-picture">
+                </iframe>`;
+            
+            // On replace le bouton de secours au cas où le site bloque l'affichage statique
+            playerContainer.appendChild(fallbackBtn);
+            fallbackBtn.href = video.link;
+            fallbackBtn.style.display = "block"; 
+            
+            // Gestion visuelle de la playlist
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+            element.classList.add('active');
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
 
-        // Style
-        document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
-        element.classList.add('active');
-        window.scrollTo({top: 0, behavior: 'smooth'});
-    }
-}
-
-        // Chargement des données
+        // On va chercher le fichier data.json mis à jour par GitHub Actions
         fetch('data.json')
             .then(res => res.json())
             .then(data => {
+                localVideoData = data; // On garde les données en mémoire
                 const gallery = document.getElementById('gallery');
                 gallery.innerHTML = '';
-                data.forEach(v => {
+                
+                // On génère la liste en passant l'index (0, 1, 2...) à la fonction de lecture
+                data.forEach((v, index) => {
                     const card = document.createElement('div');
                     card.className = 'card';
                     card.innerHTML = `
                         <img src="${v.thumb}" loading="lazy">
                         <div class="card-info">${v.title.substring(0, 45)}...</div>
                     `;
-                    card.onclick = () => playVideo(v.link, card);
+                    card.onclick = () => playVideo(index, card);
                     gallery.appendChild(card);
                 });
             })
             .catch(err => {
-                document.getElementById('gallery').innerHTML = "Erreur : data.json introuvable.";
+                document.getElementById('gallery').innerHTML = "Erreur : data.json introuvable ou mal formé.";
+                console.error(err);
             });
     </script>
 </body>
