@@ -3,34 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lustpress Explorer - Gratuit</title>
+  <title>NSFW Explorer - Gratuit</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      font-family: 'Segoe UI', Arial, sans-serif;
+      font-family: Arial, sans-serif;
       background: #0a0a0a;
       color: #eee;
       min-height: 100vh;
     }
     header {
       background: #1a001a;
-      padding: 15px 20px;
+      padding: 15px;
       text-align: center;
       border-bottom: 3px solid #ff00aa;
     }
-    h1 { font-size: 2rem; }
     .container { display: flex; min-height: calc(100vh - 70px); }
     .sidebar {
-      width: 260px;
+      width: 280px;
       background: #1a001a;
       padding: 20px;
       border-right: 1px solid #333;
     }
-    .main-content {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-    }
+    .main-content { flex: 1; padding: 20px; overflow-y: auto; }
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -41,30 +36,14 @@
       border-radius: 10px;
       overflow: hidden;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: 0.2s;
     }
-    .card:hover {
-      transform: scale(1.04);
-      box-shadow: 0 0 15px rgba(255, 0, 170, 0.5);
-    }
-    .card img {
-      width: 100%;
-      height: 170px;
-      object-fit: cover;
-    }
+    .card:hover { transform: scale(1.05); }
+    .card img { width: 100%; height: 170px; object-fit: cover; }
     .card-info { padding: 12px; }
-    .card-info h4 {
-      font-size: 1rem;
-      line-height: 1.3;
-      margin-bottom: 8px;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    select, input[type="text"], button {
+    input, select, button {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       margin: 10px 0;
       background: #222;
       border: 1px solid #555;
@@ -74,15 +53,12 @@
     button {
       background: #ff00aa;
       font-weight: bold;
-      cursor: pointer;
     }
-    button:hover { background: #ff3399; }
-
     .modal {
       display: none;
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.98);
+      background: rgba(0,0,0,0.97);
       z-index: 1000;
       align-items: center;
       justify-content: center;
@@ -93,22 +69,13 @@
       max-width: 900px;
       border-radius: 12px;
       padding: 20px;
-      position: relative;
     }
-    .close {
-      position: absolute;
-      top: 15px;
-      right: 25px;
-      font-size: 36px;
-      cursor: pointer;
-      color: #ff00aa;
-    }
-    video { width: 100%; max-height: 70vh; background: black; }
+    .close { float: right; font-size: 36px; cursor: pointer; color: #ff00aa; }
   </style>
 </head>
 <body>
   <header>
-    <h1>🔞 Lustpress Explorer (Gratuit - Sans carte)</h1>
+    <h1>🔞 NSFW Explorer (Sans API - Gratuit)</h1>
   </header>
 
   <div class="container">
@@ -118,14 +85,11 @@
         <option value="pornhub">Pornhub</option>
         <option value="xvideos">XVideos</option>
         <option value="xhamster">XHamster</option>
-        <option value="xnxx">XNXX</option>
-        <option value="redtube">RedTube</option>
       </select>
 
       <h3>Recherche</h3>
-      <input type="text" id="searchQuery" placeholder="Ex: milf, hentai, creampie..." onkeypress="if(event.key==='Enter') searchVideos()">
-
-      <button onclick="searchVideos()">🔍 Rechercher</button>
+      <input type="text" id="searchQuery" placeholder="Ex: milf, gay, hentai..." onkeypress="if(event.key==='Enter') search()">
+      <button onclick="search()">🔍 Rechercher</button>
     </aside>
 
     <main class="main-content">
@@ -133,69 +97,48 @@
     </main>
   </div>
 
-  <!-- Modal -->
   <div id="modal" class="modal">
     <div class="modal-content">
       <span onclick="closeModal()" class="close">×</span>
       <h2 id="modalTitle"></h2>
       <div id="modalVideo"></div>
-      <div id="modalDetails" style="margin-top:15px;"></div>
     </div>
   </div>
 
   <script>
-    const BASE_URL = "https://lustpress-production.up.railway.app";   // Instance publique
-
-    async function searchVideos() {
+    async function search() {
       const query = document.getElementById('searchQuery').value.trim() || "trending";
       const platform = document.getElementById('platform').value;
       const resultsDiv = document.getElementById('results');
 
-      resultsDiv.innerHTML = "<p style='color:#ff00aa; text-align:center; grid-column:1/-1;'>Chargement...</p>";
+      resultsDiv.innerHTML = "<p style='color:#ff00aa; text-align:center; grid-column:1/-1;'>Recherche en cours...</p>";
 
       try {
-        const response = await fetch(`${BASE_URL}/${platform}/search?key=${encodeURIComponent(query)}`);
-        const data = await response.json();
-
-        resultsDiv.innerHTML = '';
-
-        const videos = data.result || data.results || data.videos || [];
-
-        if (videos.length === 0) {
-          resultsDiv.innerHTML = "<p>Aucun résultat.</p>";
-          return;
+        let url = '';
+        if (platform === 'pornhub') {
+          url = `https://www.pornhub.com/video/search?search=${encodeURIComponent(query)}`;
+        } else if (platform === 'xvideos') {
+          url = `https://www.xvideos.com/?k=${encodeURIComponent(query)}`;
+        } else if (platform === 'xhamster') {
+          url = `https://xhamster.com/search/${encodeURIComponent(query)}`;
         }
 
-        videos.forEach(video => {
-          const card = document.createElement('div');
-          card.className = 'card';
-          card.innerHTML = `
-            <img src="${video.thumbnail || video.image || ''}" alt="${video.title}">
-            <div class="card-info">
-              <h4>${video.title || 'Sans titre'}</h4>
-              <small>Durée: ${video.duration || 'N/A'}</small>
-            </div>
-          `;
-          card.onclick = () => openVideoModal(video);
-          resultsDiv.appendChild(card);
-        });
+        // Note : Cette méthode est limitée car les navigateurs bloquent souvent le cross-origin.
+        // Pour un vrai fonctionnement, il faut un proxy ou self-host.
 
-      } catch (err) {
-        resultsDiv.innerHTML = `<p style="color:red;">Erreur de connexion à Lustpress.<br>Essaie plus tard ou change de plateforme.</p>`;
+        resultsDiv.innerHTML = `<p style="color:orange;">La recherche directe est limitée par le navigateur.<br>
+        Essaie avec <strong>Pornhub</strong> ou utilise un outil comme <strong>Apify / Bright Data</strong> pour du scraping sérieux.</p>`;
+      } catch(e) {
+        resultsDiv.innerHTML = "<p>Erreur. Les sites bloquent souvent les requêtes directes.</p>";
       }
     }
 
-    function openVideoModal(video) {
-      document.getElementById('modalTitle').textContent = video.title || 'Vidéo';
-      const videoUrl = video.video_url || video.url || video.direct_url || '';
-      
-      document.getElementById('modalVideo').innerHTML = videoUrl 
-        ? `<video controls autoplay><source src="${videoUrl}" type="video/mp4"></video>`
-        : `<p style="color:#ff00aa;">Aucun lien direct disponible sur cette vidéo.</p>`;
-
-      document.getElementById('modalDetails').innerHTML = `
-        <p><strong>Durée :</strong> ${video.duration || 'N/A'}</p>
-      `;
+    function openVideoModal(videoUrl, title) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalVideo').innerHTML = `
+        <video controls autoplay style="width:100%; max-height:70vh;">
+          <source src="${videoUrl}" type="video/mp4">
+        </video>`;
       document.getElementById('modal').style.display = 'flex';
     }
 
