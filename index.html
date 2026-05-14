@@ -66,29 +66,29 @@ function playVideo(index, element) {
     const video = localVideoData[index];
     if (!video || !video.embed_url) return;
 
-    // ASTUCE : On change l'extension du domaine pour bypasser certains filtres
-    // On passe de .com à .net ou on utilise leur domaine de secours
-    let forceUrl = video.embed_url.replace('www.xvideos.com', 'static-controls.xvideos.com');
+    // ASTUCE : On remplace le domaine principal par le sous-domaine de secours de XVideos
+    // Cela permet souvent de contourner la sécurité SAMEORIGIN bloquée par GitHub
+    let bypassUrl = video.embed_url.replace('www.xvideos.com', 'static-controls.xvideos.com');
+    
+    console.log("Tentative de bypass sur :", bypassUrl);
     
     playerContainer.innerHTML = `
-        <iframe src="${forceUrl}" 
+        <iframe src="${bypassUrl}" 
                 width="100%" height="100%" 
                 frameborder="0" 
                 allowfullscreen 
-                sandbox="allow-forms allow-scripts allow-same-origin"
-                allow="autoplay; fullscreen">
+                allow="autoplay; fullscreen; picture-in-picture">
         </iframe>`;
-            
-            // On replace le bouton de secours au cas où le site bloque l'affichage statique
-            playerContainer.appendChild(fallbackBtn);
-            fallbackBtn.href = video.link;
-            fallbackBtn.style.display = "block"; 
-            
-            // Gestion visuelle de la playlist
-            document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
-            element.classList.add('active');
-            window.scrollTo({top: 0, behavior: 'smooth'});
-        }
+    
+    // On garde le bouton au cas où, mais masqué si ça fonctionne
+    playerContainer.appendChild(fallbackBtn);
+    fallbackBtn.href = video.link;
+    fallbackBtn.style.display = "block"; 
+    
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    element.classList.add('active');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+}
 
         // On va chercher le fichier data.json mis à jour par GitHub Actions
         fetch('data.json')
