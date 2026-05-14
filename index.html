@@ -1,324 +1,281 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Eporner Playlist</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdultDataLink Explorer</title>
   <style>
-    :root {
-      --red:#e8132b; --red-dark:#b50f22;
-      --bg:#080808; --surface:#111; --surface2:#181818; --surface3:#202020;
-      --border:#252525; --border2:#333;
-      --text:#f0f0f0; --muted:#555; --muted2:#888;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0a0a0a;
+      color: #eee;
+      min-height: 100vh;
     }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
-    .bebas{font-family:'Bebas Neue',sans-serif;letter-spacing:.05em}
-    ::-webkit-scrollbar{width:4px;height:4px}
-    ::-webkit-scrollbar-track{background:transparent}
-    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
-    .lc1{ display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
-    .lc2{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-    .inp{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 13px;font-size:13px;transition:border-color .2s;width:100%}
-    .inp:focus{outline:none;border-color:var(--red)}
-    select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
-    
-    .btn-red{background:var(--red);color:#fff;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:500;transition:background .15s;border:none;cursor:pointer}
-    .btn-red:hover{background:var(--red-dark)}
-    .vcard{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .2s}
-    .vcard:hover{border-color:var(--red);transform:translateY(-3px)}
-    
-    .vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
-    
-    .pl-item{display:flex;gap:9px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;cursor:pointer;transition:all .15s;position:relative}
-    .pl-item:hover{border-color:var(--border2)}
-    .pl-item.playing{border-color:var(--red);background:rgba(232,19,43,.08)}
-    .pl-item.dead{opacity:.45}
-    
-    #playerWrap{background:#000;border-radius:0;overflow:hidden}
-    #nextBanner{background:#0c0c0c;border-top:1px solid var(--border);padding:12px 14px;display:none;align-items:center;gap:12px}
-    #nextBanner.on{display:flex}
-    
-    .dead-badge{position:absolute;top:6px;right:6px;background:#7f1d1d;color:#fca5a5;font-size:9px;padding:2px 6px;border-radius:3px;font-weight:600}
+    header {
+      background: #1a001a;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid #ff00aa;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    h1 { font-size: 1.8rem; }
+    .api-key {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .api-key input {
+      padding: 8px 12px;
+      width: 280px;
+      background: #222;
+      border: 1px solid #ff00aa;
+      color: white;
+      border-radius: 6px;
+    }
+    .container {
+      display: flex;
+      min-height: calc(100vh - 70px);
+    }
+    .sidebar {
+      width: 260px;
+      background: #1a001a;
+      padding: 20px;
+      border-right: 1px solid #333;
+    }
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 18px;
+    }
+    .card {
+      background: #1f001f;
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .card:hover {
+      transform: scale(1.04);
+      box-shadow: 0 0 15px rgba(255, 0, 170, 0.4);
+    }
+    .card img {
+      width: 100%;
+      height: 170px;
+      object-fit: cover;
+    }
+    .card-info {
+      padding: 12px;
+    }
+    .card-info h4 {
+      font-size: 1rem;
+      line-height: 1.3;
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    select, input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      background: #222;
+      border: 1px solid #555;
+      color: white;
+      border-radius: 6px;
+    }
+    button {
+      padding: 12px;
+      background: #ff00aa;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover { background: #ff3399; }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.98);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: #1a001a;
+      width: 95%;
+      max-width: 900px;
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+    }
+    .close {
+      position: absolute;
+      top: 15px;
+      right: 25px;
+      font-size: 36px;
+      cursor: pointer;
+      color: #ff00aa;
+    }
+    video { width: 100%; max-height: 70vh; background: black; }
   </style>
 </head>
 <body>
-<div style="max-width:1480px;margin:0 auto;padding:16px 16px 80px">
-  <!-- Header -->
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
-    <h1 class="bebas" style="font-size:2.3rem;color:var(--red)">EPORNER</h1>
-    <span style="font-size:11px;color:var(--muted2)">Playlist Manager</span>
-  </div>
-
-  <!-- Nav tabs -->
-  <div style="display:flex;border-bottom:1px solid var(--border);margin-bottom:18px;gap:2px">
-    <button class="nav-tab active" onclick="switchTab('search')" id="tabSearch">🔍 Recherche</button>
-    <button class="nav-tab" onclick="switchTab('lookup')" id="tabLookup">🎯 Par ID</button>
-    <button class="nav-tab" onclick="switchTab('health')" id="tabHealth">🩺 Santé</button>
-  </div>
-
-  <div style="display:flex;gap:18px;align-items:flex-start">
-    <!-- MAIN -->
-    <div style="flex:1;min-width:0">
-      <!-- SEARCH -->
-      <div id="panelSearch">
-        <div style="display:flex;gap:8px;margin-bottom:12px">
-          <input id="searchInput" type="text" class="inp" placeholder="Rechercher des vidéos..." style="flex:1">
-          <button onclick="searchVideos(1)" class="btn-red" style="padding:9px 24px">Chercher</button>
-        </div>
-
-        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-          <select id="fOrder" class="inp" style="width:auto">
-            <option value="latest">Plus récentes</option>
-            <option value="oldest">Plus anciennes</option>
-            <option value="top-rated">Mieux notées</option>
-            <option value="most-popular" selected>Plus populaires</option>
-          </select>
-          <select id="fPer" class="inp" style="width:auto">
-            <option value="24">24 / page</option>
-            <option value="32" selected>32 / page</option>
-            <option value="48">48 / page</option>
-          </select>
-          <select id="fThumb" class="inp" style="width:auto">
-            <option value="huge" selected>Miniatures énormes</option>
-            <option value="big">Grandes</option>
-            <option value="medium">Moyennes</option>
-          </select>
-        </div>
-
-        <div id="searchMeta" style="display:none;justify-content:space-between;margin-bottom:12px;font-size:13px;color:var(--muted2)"></div>
-        <div id="videoGrid" class="vgrid"></div>
-        <div id="paginBot" style="display:none;justify-content:center;gap:6px;margin-top:24px"></div>
-      </div>
-
-      <!-- Autres panels (lookup + health) restent identiques -->
-      <!-- ... (je les ai gardés pour ne pas alourdir, mais tu peux les remettre) ... -->
+  <header>
+    <h1>🔞 AdultDataLink Explorer</h1>
+    <div class="api-key">
+      <input type="password" id="apiKey" placeholder="Ta clé RapidAPI ici">
+      <button onclick="saveApiKey()">Sauvegarder</button>
     </div>
+  </header>
 
-    <!-- SIDEBAR -->
-    <div style="width:340px;flex-shrink:0;position:sticky;top:12px">
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden">
-        <!-- Playlist header + items -->
-        <div id="playlistItems" style="max-height:520px;overflow-y:auto;padding:8px"></div>
-      </div>
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h3>Plateforme</h3>
+      <select id="platform">
+        <option value="pornhub">Pornhub</option>
+        <option value="xvideos">XVideos</option>
+        <option value="xhamster">XHamster</option>
+        <option value="erome">Erome</option>
+        <option value="redgifs">Redgifs</option>
+      </select>
+
+      <h3>Recherche</h3>
+      <input type="text" id="searchQuery" placeholder="Ex: milf, creampie, ebony..." onkeypress="if(event.key==='Enter') searchVideos()">
+
+      <button onclick="searchVideos()" style="width:100%; margin:15px 0;">🔍 Rechercher</button>
+
+      <h3>Tri</h3>
+      <select id="sort">
+        <option value="relevance">Pertinence</option>
+        <option value="views">Plus vues</option>
+        <option value="newest">Plus récentes</option>
+      </select>
+    </aside>
+
+    <!-- Résultats -->
+    <main class="main-content">
+      <div id="results" class="grid"></div>
+    </main>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span onclick="closeModal()" class="close">×</span>
+      <h2 id="modalTitle" style="margin-bottom:15px;"></h2>
+      <div id="modalVideo"></div>
+      <div id="modalDetails" style="margin-top:15px; color:#ccc;"></div>
     </div>
   </div>
-</div>
 
-<!-- Player -->
-<div id="playerWrap" style="position:fixed;bottom:20px;right:20px;width:380px;background:#000;border-radius:12px;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.7);display:none;z-index:100">
-  <iframe id="videoPlayer" width="100%" height="214" allowfullscreen style="display:block;border:0"></iframe>
-  <div style="padding:12px 14px;background:#0a0a0a">
-    <p id="videoTitle" class="lc2" style="font-size:13px;font-weight:500;margin-bottom:8px"></p>
-    <div style="display:flex;gap:8px">
-      <button onclick="playPrev()" class="btn-red">⏮ Préc</button>
-      <button onclick="playNext()" class="btn-red">Suiv ⏭</button>
-    </div>
-  </div>
-  <!-- Next Banner -->
-  <div id="nextBanner" class="on">
-    <img id="nThumb" style="width:68px;height:46px;object-fit:cover;border-radius:6px">
-    <div style="flex:1">
-      <p style="font-size:11px;color:#888">Suivant dans <span id="countdown" style="color:var(--red);font-weight:600"></span></p>
-      <p id="nTitle" class="lc1" style="font-size:12.5px"></p>
-    </div>
-    <button onclick="playNext()" class="btn-red">▶</button>
-  </div>
-</div>
+  <script>
+    let API_KEY = localStorage.getItem('adultApiKey') || '';
+    if (API_KEY) document.getElementById('apiKey').value = API_KEY;
 
-<div id="toast" style="position:fixed;bottom:30px;right:30px;background:#111;border:1px solid #333;border-radius:10px;padding:12px 18px;color:white;transform:translateY(100px);opacity:0;transition:all .4s"></div>
-
-<script>
-// ==================== STATE ====================
-let playlists = JSON.parse(localStorage.getItem('epl_v4')||'{}');
-let activePlId = localStorage.getItem('epl_active')||null;
-let currentIdx = -1;
-let autoTimeout = null;
-
-if (!Object.keys(playlists).length) {
-  const id = 'pl_' + Date.now();
-  playlists[id] = {name: 'Ma playlist', videos: []};
-  activePlId = id;
-  save();
-}
-
-function save() {
-  localStorage.setItem('epl_v4', JSON.stringify(playlists));
-  localStorage.setItem('epl_active', activePlId);
-}
-
-function activePl() { return playlists[activePlId]; }
-
-// ==================== PLAYER + AUTO PLAY ====================
-function playVideo(id, title, thumb) {
-  clearTimeout(autoTimeout);
-  
-  document.getElementById('playerWrap').style.display = 'block';
-  document.getElementById('videoPlayer').src = `https://www.eporner.com/embed/${id}`;
-  document.getElementById('videoTitle').textContent = title;
-
-  const pl = activePl();
-  if (pl) currentIdx = pl.videos.findIndex(v => v.id === id);
-
-  renderPlaylistItems();
-  startAutoNext();
-}
-
-async function startAutoNext() {
-  const pl = activePl();
-  if (!pl || currentIdx < 0 || currentIdx >= pl.videos.length - 1) return;
-
-  const nextVid = pl.videos[currentIdx + 1];
-  
-  document.getElementById('nThumb').src = nextVid.thumb;
-  document.getElementById('nTitle').textContent = nextVid.title;
-  document.getElementById('nextBanner').classList.add('on');
-
-  // Estimation durée (moyenne 12 min) ou fetch réelle
-  let duration = 720; // 12 minutes par défaut
-  try {
-    const res = await fetch(`https://www.eporner.com/api/v2/video/id/${nextVid.id}/?format=json`);
-    const data = await res.json();
-    const durStr = (data.video || data).length || '';
-    duration = durStr.split(':').reduce((a,b) => a*60 + +b, 0) || 720;
-  } catch(e) {}
-
-  let timeLeft = Math.max(8, duration); // minimum 8 secondes
-
-  const countdownEl = document.getElementById('countdown');
-  
-  const tick = () => {
-    countdownEl.textContent = timeLeft + "s";
-    if (timeLeft <= 0) {
-      playNext();
-    } else {
-      autoTimeout = setTimeout(tick, 1000);
-      timeLeft--;
+    function saveApiKey() {
+      API_KEY = document.getElementById('apiKey').value.trim();
+      if (API_KEY) {
+        localStorage.setItem('adultApiKey', API_KEY);
+        alert('✅ Clé API sauvegardée !');
+      }
     }
-  };
-  tick();
-}
 
-function playNext() {
-  const pl = activePl();
-  if (!pl || currentIdx >= pl.videos.length - 1) return;
-  
-  currentIdx++;
-  const v = pl.videos[currentIdx];
-  playVideo(v.id, v.title, v.thumb);
-}
+    async function searchVideos() {
+      if (!API_KEY) {
+        alert("⚠️ Entre d'abord ta clé RapidAPI");
+        return;
+      }
 
-function playPrev() {
-  const pl = activePl();
-  if (!pl || currentIdx <= 0) return;
-  
-  currentIdx--;
-  const v = pl.videos[currentIdx];
-  playVideo(v.id, v.title, v.thumb);
-}
+      const query = document.getElementById('searchQuery').value.trim() || "trending";
+      const platform = document.getElementById('platform').value;
+      const resultsDiv = document.getElementById('results');
 
-// ==================== SEARCH (avec grosses vignettes) ====================
-async function searchVideos(page = 1) {
-  const q = document.getElementById('searchInput').value.trim();
-  if (!q) return alert("Entre un mot-clé");
+      resultsDiv.innerHTML = "<p style='color:#ff00aa; text-align:center; grid-column:1/-1;'>Chargement des vidéos...</p>";
 
-  const grid = document.getElementById('videoGrid');
-  grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:#666">Recherche en cours...</div>`;
+      try {
+        // À adapter selon la documentation exacte de AdultDataLink sur RapidAPI
+        const response = await fetch(`https://porn-api-adultdatalink.p.rapidapi.com/${platform}/search`, {
+          method: 'GET',
+          headers: {
+            'X-RapidAPI-Key': API_KEY,
+            'X-RapidAPI-Host': 'porn-api-adultdatalink.p.rapidapi.com'
+          }
+        });
 
-  try {
-    const url = `https://www.eporner.com/api/v2/video/search/?query=${encodeURIComponent(q)}&per_page=32&page=${page}&thumbsize=huge&order=most-popular&format=json`;
-    const resp = await fetch(url);
-    const data = await resp.json();
+        if (!response.ok) throw new Error("Erreur API (vérifie ta clé)");
 
-    grid.innerHTML = '';
-    data.videos.forEach(v => {
-      const card = document.createElement('div');
-      card.className = 'vcard';
-      card.innerHTML = `
-        <div style="position:relative">
-          <img src="${v.thumb}" style="width:100%;aspect-ratio:16/9;object-fit:cover" loading="lazy">
-          <span style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.85);font-size:11px;padding:1px 6px;border-radius:3px">${v.length}</span>
-        </div>
-        <div style="padding:10px">
-          <p class="lc2" style="font-size:13.5px;line-height:1.35;margin-bottom:8px">${v.title}</p>
-          <div style="display:flex;gap:6px">
-            <button onclick="playVideo('${v.id}','${v.title.replace(/'/g,"\\'")}','${v.thumb}');event.stopPropagation()" class="btn-red flex-1">▶ Lire</button>
-            <button onclick="addToCurrentPlaylist('${v.id}','${v.title.replace(/'/g,"\\'")}','${v.thumb}');event.stopPropagation()" class="bg-zinc-800 hover:bg-zinc-700 text-white px-4 rounded">＋</button>
-          </div>
-        </div>
+        const data = await response.json();
+
+        resultsDiv.innerHTML = '';
+
+        const videos = data.results || data.videos || data.data || [];
+
+        if (videos.length === 0) {
+          resultsDiv.innerHTML = "<p>Aucun résultat trouvé.</p>";
+          return;
+        }
+
+        videos.forEach(video => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <img src="${video.thumbnail || video.image || 'https://via.placeholder.com/280x170/330033/ffffff?text=Video'}" alt="${video.title}">
+            <div class="card-info">
+              <h4>${video.title || 'Sans titre'}</h4>
+              <small>Durée: ${video.duration || 'N/A'} | Vues: ${video.views ? Number(video.views).toLocaleString() : 'N/A'}</small>
+            </div>
+          `;
+          card.onclick = () => openVideoModal(video);
+          resultsDiv.appendChild(card);
+        });
+
+      } catch (err) {
+        console.error(err);
+        resultsDiv.innerHTML = `<p style="color:red; grid-column:1/-1;">Erreur : ${err.message}<br><small>Vérifie ta clé API et ta connexion.</small></p>`;
+      }
+    }
+
+    function openVideoModal(video) {
+      document.getElementById('modalTitle').textContent = video.title || 'Vidéo';
+      
+      const videoUrl = video.video_url || video.direct_url || video.url || '';
+      
+      document.getElementById('modalVideo').innerHTML = videoUrl 
+        ? `<video controls autoplay><source src="${videoUrl}" type="video/mp4"></video>`
+        : `<p style="color:#ff00aa;">Aucun lien de lecture direct disponible.</p>`;
+
+      document.getElementById('modalDetails').innerHTML = `
+        <p><strong>Durée :</strong> ${video.duration || 'N/A'}</p>
+        <p><strong>Vues :</strong> ${video.views ? Number(video.views).toLocaleString() : 'N/A'}</p>
+        ${video.tags ? `<p><strong>Tags :</strong> ${video.tags}</p>` : ''}
       `;
-      grid.appendChild(card);
-    });
-  } catch(e) {
-    grid.innerHTML = `<p style="color:red;padding:20px">Erreur de connexion</p>`;
-  }
-}
 
-// ==================== Playlist ====================
-function addToCurrentPlaylist(id, title, thumb) {
-  const pl = activePl();
-  if (!pl) return;
-  if (pl.videos.some(v => v.id === id)) {
-    alert("Déjà dans la playlist");
-    return;
-  }
-  pl.videos.push({id, title, thumb});
-  save();
-  renderPlaylistItems();
-  toast("Vidéo ajoutée à la playlist");
-}
+      document.getElementById('modal').style.display = 'flex';
+    }
 
-function renderPlaylistItems() {
-  const pl = activePl();
-  const container = document.getElementById('playlistItems');
-  container.innerHTML = '';
+    function closeModal() {
+      document.getElementById('modal').style.display = 'none';
+      document.getElementById('modalVideo').innerHTML = '';
+    }
 
-  pl.videos.forEach((v, i) => {
-    const item = document.createElement('div');
-    item.className = `pl-item ${i === currentIdx ? 'playing' : ''}`;
-    item.innerHTML = `
-      <img src="${v.thumb}" style="width:78px;height:52px;object-fit:cover;border-radius:6px">
-      <div style="flex:1;min-width:0">
-        <p class="lc2" style="font-size:12.5px;line-height:1.35">${v.title}</p>
-        <div style="margin-top:6px;display:flex;gap:5px">
-          <button onclick="playVideo('${v.id}','${v.title.replace(/'/g,"\\'")}','${v.thumb}');event.stopPropagation()" class="btn-red text-xs px-3 py-1">▶</button>
-          <button onclick="removeFromPlaylist(${i});event.stopPropagation()" class="bg-red-900 hover:bg-red-800 text-xs px-3 py-1">✕</button>
-        </div>
-      </div>
-    `;
-    item.onclick = () => playVideo(v.id, v.title, v.thumb);
-    container.appendChild(item);
-  });
-}
-
-function removeFromPlaylist(i) {
-  const pl = activePl();
-  pl.videos.splice(i, 1);
-  if (currentIdx >= i) currentIdx--;
-  save();
-  renderPlaylistItems();
-}
-
-// Utils
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.transform = 'translateY(0)';
-  t.style.opacity = '1';
-  setTimeout(() => {
-    t.style.transform = 'translateY(100px)';
-    t.style.opacity = '0';
-  }, 2500);
-}
-
-// Init
-document.getElementById('searchInput').addEventListener('keypress', e => {
-  if (e.key === 'Enter') searchVideos(1);
-});
-
-renderPlaylistItems();
-</script>
+    // Chargement initial
+    window.onload = () => {
+      if (API_KEY) searchVideos();
+    };
+  </script>
 </body>
 </html>
