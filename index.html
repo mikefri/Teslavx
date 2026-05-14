@@ -150,6 +150,51 @@
     .progress-fill { height: 100%; background: var(--red); border-radius: 1px; transition: width 0.3s; }
 
     input[type="text"] { font-family: 'DM Sans', sans-serif; }
+
+    /* Auto-advance banner */
+    #nextUpBanner {
+      background: #0d0d0d;
+      border-top: 1px solid var(--border);
+      padding: 12px 16px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+    }
+    #nextUpBanner.visible { display: flex; }
+
+    #autoCountdownRing {
+      width: 40px; height: 40px;
+      position: relative; flex-shrink: 0;
+    }
+    #autoCountdownRing svg { transform: rotate(-90deg); }
+    #autoCountdownRing circle {
+      fill: none; stroke-width: 3;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s linear;
+    }
+    #autoCountdownRing .track { stroke: var(--border); }
+    #autoCountdownRing .fill  { stroke: var(--red); }
+    #autoCountdownNum {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600;
+    }
+
+    /* Toggle switch */
+    .toggle { position: relative; display: inline-flex; align-items: center; cursor: pointer; gap: 8px; font-size: 12px; color: var(--muted); }
+    .toggle input { display: none; }
+    .toggle-track {
+      width: 32px; height: 18px; border-radius: 9px;
+      background: var(--border); transition: background 0.2s; flex-shrink:0;
+    }
+    .toggle input:checked ~ .toggle-track { background: var(--red); }
+    .toggle-thumb {
+      position: absolute; left: 3px; top: 3px;
+      width: 12px; height: 12px; border-radius: 50%;
+      background: white; transition: left 0.2s;
+      pointer-events: none;
+    }
+    .toggle input:checked ~ .toggle-track .toggle-thumb { left: 17px; }
   </style>
 </head>
 <body>
@@ -186,9 +231,38 @@
             </div>
             <h2 id="videoTitle" class="font-semibold text-base"></h2>
           </div>
-          <div class="flex gap-2 shrink-0">
+          <div class="flex items-center gap-3 shrink-0">
+            <!-- Auto-advance toggle -->
+            <label class="toggle" title="Lecture automatique">
+              <input type="checkbox" id="autoToggle" checked onchange="onAutoToggleChange()">
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+              <span>Auto</span>
+            </label>
             <button onclick="playPrev()" class="btn-ghost text-xs px-3 py-2">⏮ Préc.</button>
             <button onclick="playNext()" class="btn-ghost text-xs px-3 py-2">Suiv. ⏭</button>
+          </div>
+        </div>
+
+        <!-- Next up banner -->
+        <div id="nextUpBanner">
+          <!-- Countdown ring -->
+          <div id="autoCountdownRing">
+            <svg width="40" height="40" viewBox="0 0 40 40">
+              <circle class="track" cx="20" cy="20" r="17"/>
+              <circle class="fill" id="ringFill" cx="20" cy="20" r="17"
+                stroke-dasharray="106.8" stroke-dashoffset="106.8"/>
+            </svg>
+            <div id="autoCountdownNum">—</div>
+          </div>
+          <!-- Next video info -->
+          <img id="nextThumb" src="" style="width:64px;height:42px;object-fit:cover;border-radius:5px;flex-shrink:0">
+          <div style="flex:1;min-width:0">
+            <p style="font-size:11px;color:var(--muted);margin-bottom:2px">Suivant</p>
+            <p id="nextTitle" class="line-clamp-1" style="font-size:13px;font-weight:500"></p>
+          </div>
+          <div class="flex gap-2 shrink-0">
+            <button onclick="playNext()" class="btn-red text-xs px-3 py-1.5">▶ Maintenant</button>
+            <button onclick="cancelAutoAdvance()" class="btn-ghost text-xs px-3 py-1.5">✕ Annuler</button>
           </div>
         </div>
       </div>
@@ -316,8 +390,103 @@
     } catch { grid.innerHTML = '<p style="color:var(--red);font-size:14px;grid-column:1/-1">Erreur de connexion.</p>'; }
   }
 
+  // ─── Auto-advance ─────────────────────────────────────────────────────────
+  let autoTimer = null;       // setInterval handle
+  let autoSecondsLeft = 0;
+  let autoDuration = 0;
+  let autoAdvanceCancelled = false;
+
+  function parseDuration(str) {
+    // "1:23:45" or "12:34" or "45"
+    const parts = String(str).split(':').map(Number);
+    if (parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
+    if (parts.length === 2) return parts[0]*60 + parts[1];
+    return parts[0] || 0;
+  }
+
+  function isAutoEnabled() { return document.getElementById('autoToggle').checked; }
+  function onAutoToggleChange() { if (!isAutoEnabled()) cancelAutoAdvance(); }
+
+  async function startAutoAdvance(videoId) {
+    cancelAutoAdvance();
+    autoAdvanceCancelled = false;
+    if (!isAutoEnabled()) return;
+
+    const pl = activePl();
+    if (!pl || currentPlayingIndex < 0 || currentPlayingIndex >= pl.videos.length - 1) return;
+
+    // Fetch duration from API
+    let duration = 0;
+    try {
+      const res = await fetch(`https://www.eporner.com/api/v2/video/id/${videoId}/`);
+      const data = await res.json();
+      duration = parseDuration(data.video?.length || data.length || 0);
+    } catch { duration = 0; }
+
+    if (autoAdvanceCancelled) return; // user cancelled while fetching
+
+    if (!duration || duration < 5) {
+      // API failed or too short — skip auto-advance
+      hideBanner();
+      return;
+    }
+
+    // Show next-up banner
+    const nextVideo = pl.videos[currentPlayingIndex + 1];
+    showBanner(nextVideo, duration);
+    autoDuration = duration;
+    autoSecondsLeft = duration;
+    updateRing(duration, duration);
+
+    autoTimer = setInterval(() => {
+      autoSecondsLeft--;
+      updateRing(autoSecondsLeft, autoDuration);
+      if (autoSecondsLeft <= 0) {
+        clearInterval(autoTimer);
+        autoTimer = null;
+        hideBanner();
+        playNext();
+      }
+    }, 1000);
+  }
+
+  function cancelAutoAdvance() {
+    autoAdvanceCancelled = true;
+    if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+    hideBanner();
+  }
+
+  function showBanner(nextVideo, duration) {
+    const banner = document.getElementById('nextUpBanner');
+    document.getElementById('nextThumb').src = nextVideo.thumb;
+    document.getElementById('nextTitle').textContent = nextVideo.title;
+    banner.classList.add('visible');
+  }
+
+  function hideBanner() {
+    document.getElementById('nextUpBanner').classList.remove('visible');
+    document.getElementById('autoCountdownNum').textContent = '—';
+    const fill = document.getElementById('ringFill');
+    fill.style.strokeDashoffset = '106.8';
+  }
+
+  const CIRCUMFERENCE = 106.8;
+  function updateRing(left, total) {
+    const pct = total > 0 ? left / total : 0;
+    const offset = CIRCUMFERENCE * (1 - pct);
+    document.getElementById('ringFill').style.strokeDashoffset = offset;
+
+    // Show readable countdown: last 60 sec → "Xs", before → "Xm"
+    let label;
+    if (left > 3600)      label = `${Math.floor(left/3600)}h`;
+    else if (left > 60)   label = `${Math.floor(left/60)}m`;
+    else                   label = `${left}s`;
+    document.getElementById('autoCountdownNum').textContent = label;
+  }
+
   // ─── Player ───────────────────────────────────────────────────────────────
   function playVideo(id, title) {
+    cancelAutoAdvance();
     currentVideoId = id;
     document.getElementById('playerContainer').classList.remove('hidden');
     document.getElementById('videoPlayer').src = `https://www.eporner.com/embed/${id}`;
@@ -327,6 +496,8 @@
     if (pl) currentPlayingIndex = pl.videos.findIndex(v => v.id === id);
     renderPlaylistItems();
     document.getElementById('playerContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Start auto-advance if in playlist
+    if (currentPlayingIndex >= 0) startAutoAdvance(id);
   }
 
   function playAll() {
