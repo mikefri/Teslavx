@@ -55,6 +55,47 @@
         #player-placeholder svg { opacity: .3; }
         #player-placeholder p { font-size: .9rem; }
 
+        /* ── FULLSCREEN BUTTON ── */
+        #fullscreen-btn {
+            position: absolute;
+            top: 10px; right: 10px;
+            z-index: 10;
+            background: rgba(0,0,0,.65);
+            border: 1px solid rgba(255,255,255,.15);
+            color: var(--text);
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: none;
+            align-items: center; justify-content: center;
+            backdrop-filter: blur(6px);
+            transition: background .15s, transform .15s;
+        }
+        #fullscreen-btn:hover {
+            background: var(--accent);
+            color: #000;
+            transform: scale(1.08);
+        }
+        #fullscreen-btn.visible { display: flex; }
+
+        /* ── QUEUE indicator badge ── */
+        #queue-badge {
+            position: absolute;
+            bottom: 10px; left: 10px;
+            z-index: 10;
+            background: rgba(232,168,56,.18);
+            border: 1px solid rgba(232,168,56,.35);
+            color: var(--accent);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: .72rem; font-weight: 600;
+            letter-spacing: .04em;
+            display: none;
+            backdrop-filter: blur(6px);
+        }
+        #queue-badge.visible { display: block; }
+
         /* Autoplay overlay */
         #autoplay-bar {
             display: none;
@@ -142,14 +183,6 @@
         .pl-btn:hover { color: var(--text); background: var(--border); }
         .pl-btn.del:hover { color: var(--danger); }
 
-        .pl-name-input {
-            background: var(--surface3); border: 1px solid var(--accent);
-            color: var(--text); border-radius: 5px;
-            padding: 2px 6px; font-size: .85rem;
-            font-family: 'DM Sans', sans-serif;
-            width: 100%; outline: none;
-        }
-
         /* Now playing queue */
         #now-playing-panel {
             border-top: 1px solid var(--border);
@@ -160,7 +193,13 @@
         #np-title {
             font-size: .72rem; text-transform: uppercase; letter-spacing: .06em;
             color: var(--accent); font-weight: 600; margin-bottom: 8px; padding: 0 4px;
+            display: flex; align-items: center; justify-content: space-between;
         }
+        #np-clear-btn {
+            background: none; border: none; color: var(--muted); cursor: pointer;
+            font-size: .7rem; padding: 2px 6px; border-radius: 4px; transition: .1s;
+        }
+        #np-clear-btn:hover { color: var(--danger); background: var(--surface3); }
         #np-queue { max-height: 140px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
         .np-item {
             display: flex; gap: 8px; align-items: center;
@@ -208,11 +247,6 @@
 
         #gallery-wrap { flex: 1; overflow-y: auto; padding: 18px; }
 
-        .section-label {
-            font-size: .72rem; text-transform: uppercase; letter-spacing: .08em;
-            color: var(--muted); font-weight: 600; margin-bottom: 12px;
-        }
-
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
@@ -229,6 +263,17 @@
         }
         .card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 8px 24px rgba(0,0,0,.4); }
         .card.active { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(232,168,56,.3); }
+
+        /* Queue position pill on card (in playlist view) */
+        .card-queue-pos {
+            position: absolute; top: 6px; left: 6px;
+            background: rgba(0,0,0,.75); color: var(--accent);
+            font-size: .65rem; font-family: 'DM Mono', monospace; font-weight: 600;
+            padding: 2px 7px; border-radius: 20px;
+            backdrop-filter: blur(4px);
+            display: none;
+        }
+        .card.in-queue .card-queue-pos { display: block; }
 
         .card-thumb-wrap { position: relative; }
         .card img { width: 100%; height: 95px; object-fit: cover; display: block; }
@@ -259,7 +304,6 @@
         }
         .c-btn:hover { transform: scale(1.15); }
         .c-btn.add-to-pl:hover { background: var(--accent); color: #000; }
-        .c-btn.fav-btn { }
         .c-btn.fav-btn.is-fav { color: var(--danger); }
         .c-btn.fav-btn:hover { background: var(--danger); color: white; }
 
@@ -341,6 +385,13 @@
         </svg>
         <p>Sélectionnez une vidéo pour commencer</p>
     </div>
+
+    <!-- Fullscreen button -->
+    <button id="fullscreen-btn" title="Plein écran">⛶</button>
+
+    <!-- Queue badge -->
+    <div id="queue-badge"></div>
+
     <div id="autoplay-bar">
         <span id="autoplay-label">Suivant dans 10s</span>
         <div id="autoplay-progress"><div id="autoplay-fill"></div></div>
@@ -358,11 +409,12 @@
             <h3>Playlists</h3>
             <button id="btn-new-playlist" title="Nouvelle playlist">+</button>
         </div>
-        <div id="playlist-list">
-            <!-- filled by JS -->
-        </div>
+        <div id="playlist-list"></div>
         <div id="now-playing-panel">
-            <div id="np-title">▶ En lecture</div>
+            <div id="np-title">
+                <span>▶ En lecture</span>
+                <button id="np-clear-btn" title="Vider la file">✕ vider</button>
+            </div>
             <div id="np-queue"></div>
         </div>
     </div>
@@ -401,9 +453,9 @@ let allVideos = [];
 let playlists = JSON.parse(localStorage.getItem('playlists_v2')) || [
     { id: 'favs', name: '⭐ Favoris', videos: [] }
 ];
-let currentView = 'all'; // 'all' | playlist id
-let currentlyPlaying = null; // { video, cardEl }
-let playQueue = [];   // array of video objects
+let currentView = 'all';
+let currentlyPlaying = null;
+let playQueue = [];
 let playQueueIdx = -1;
 let autoplayTimer = null;
 let autoplayInterval = null;
@@ -414,6 +466,36 @@ let activeDropdown = null;
 // ═══════════════════════════════════════════════
 function savePlaylists() {
     localStorage.setItem('playlists_v2', JSON.stringify(playlists));
+}
+
+// ═══════════════════════════════════════════════
+// FULLSCREEN
+// ═══════════════════════════════════════════════
+document.getElementById('fullscreen-btn').onclick = () => {
+    const wrap = document.getElementById('player-wrap');
+    const iframe = wrap.querySelector('iframe');
+    const target = iframe || wrap;
+    if (target.requestFullscreen) target.requestFullscreen();
+    else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
+    else if (target.mozRequestFullScreen) target.mozRequestFullScreen();
+};
+
+// Show/hide fullscreen button based on whether iframe is loaded
+function updateFullscreenBtn(show) {
+    document.getElementById('fullscreen-btn').classList.toggle('visible', show);
+}
+
+// ═══════════════════════════════════════════════
+// QUEUE BADGE
+// ═══════════════════════════════════════════════
+function updateQueueBadge() {
+    const badge = document.getElementById('queue-badge');
+    if (playQueue.length > 0 && playQueueIdx >= 0) {
+        badge.textContent = `${playQueueIdx + 1} / ${playQueue.length}`;
+        badge.classList.add('visible');
+    } else {
+        badge.classList.remove('visible');
+    }
 }
 
 // ═══════════════════════════════════════════════
@@ -436,19 +518,22 @@ function playVideo(video, cardEl, fromQueue = false) {
     iframe.allow = 'autoplay; fullscreen';
     wrap.insertBefore(iframe, wrap.firstChild);
 
+    updateFullscreenBtn(true);
+
     currentlyPlaying = { video, cardEl };
     document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
     if (cardEl) cardEl.classList.add('active');
 
     if (!fromQueue) {
-        // single play — clear queue
         cancelAutoplay();
         playQueue = [];
         playQueueIdx = -1;
         updateNowPlayingPanel();
+        updateQueueBadge();
+        updateCardQueueMarkers();
     }
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function startQueuePlayback(videos, startIdx = 0) {
@@ -462,12 +547,12 @@ function playFromQueue(idx) {
     if (idx < 0 || idx >= playQueue.length) return;
     playQueueIdx = idx;
     const video = playQueue[idx];
-    // find card if visible
     const card = [...document.querySelectorAll('.card')].find(c => c.dataset.embedUrl === video.embed_url);
     playVideo(video, card, true);
     updateNowPlayingPanel();
+    updateQueueBadge();
+    updateCardQueueMarkers();
 
-    // Start autoplay countdown for next
     if (idx < playQueue.length - 1) {
         scheduleAutoplay();
     }
@@ -518,7 +603,26 @@ document.getElementById('autoplay-cancel').onclick = () => {
     playQueue = [];
     playQueueIdx = -1;
     updateNowPlayingPanel();
+    updateQueueBadge();
+    updateCardQueueMarkers();
 };
+
+// ═══════════════════════════════════════════════
+// CARD QUEUE MARKERS
+// ═══════════════════════════════════════════════
+function updateCardQueueMarkers() {
+    document.querySelectorAll('.card').forEach(card => {
+        const embedUrl = card.dataset.embedUrl;
+        const queueIdx = playQueue.findIndex(v => v.embed_url === embedUrl);
+        const posEl = card.querySelector('.card-queue-pos');
+        if (queueIdx >= 0) {
+            card.classList.add('in-queue');
+            if (posEl) posEl.textContent = queueIdx === playQueueIdx ? '▶' : `${queueIdx + 1}`;
+        } else {
+            card.classList.remove('in-queue');
+        }
+    });
+}
 
 // ═══════════════════════════════════════════════
 // NOW PLAYING PANEL
@@ -537,17 +641,25 @@ function updateNowPlayingPanel() {
         const el = document.createElement('div');
         el.className = 'np-item' + (i === playQueueIdx ? ' np-active' : '');
         el.innerHTML = `
-            <span class="np-idx">${i + 1}</span>
-            <img class="np-thumb" src="${v.thumb}" loading="lazy">
-            <span class="np-name">${v.title}</span>
+            <span class="np-idx">${i === playQueueIdx ? '▶' : i + 1}</span>
+            <img class="np-thumb" src="${v.thumb}" loading="lazy" onerror="this.style.opacity='.3'">
+            <span class="np-name">${escHtml(v.title)}</span>
         `;
         el.onclick = () => { cancelAutoplay(); playFromQueue(i); };
         queue.appendChild(el);
     });
-    // scroll active into view
     const active = queue.querySelector('.np-active');
     if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
+
+document.getElementById('np-clear-btn').onclick = () => {
+    cancelAutoplay();
+    playQueue = [];
+    playQueueIdx = -1;
+    updateNowPlayingPanel();
+    updateQueueBadge();
+    updateCardQueueMarkers();
+};
 
 // ═══════════════════════════════════════════════
 // GALLERY RENDERING
@@ -579,10 +691,16 @@ function renderContent() {
         </div>`;
         return;
     }
-    videos.forEach(v => gallery.appendChild(createCard(v)));
+
+    // Pass playlist videos for queue context (null if "all" view)
+    const queueVideos = currentView !== 'all' ? videos : null;
+    videos.forEach((v, i) => gallery.appendChild(createCard(v, i, queueVideos)));
+
+    // Re-apply queue markers after re-render
+    updateCardQueueMarkers();
 }
 
-function createCard(video) {
+function createCard(video, idx, queueVideos) {
     const card = document.createElement('div');
     card.className = 'card';
     card.dataset.embedUrl = video.embed_url;
@@ -591,6 +709,7 @@ function createCard(video) {
 
     card.innerHTML = `
         <div class="card-thumb-wrap">
+            <span class="card-queue-pos"></span>
             <img src="${video.thumb}" loading="lazy" onerror="this.style.display='none'">
             <div class="card-overlay"><span class="play-icon">▶</span></div>
             <div class="card-actions">
@@ -605,12 +724,23 @@ function createCard(video) {
 
     card.querySelector('.fav-btn').onclick = e => { e.stopPropagation(); toggleFav(video, card); };
     card.querySelector('.add-to-pl').onclick = e => { e.stopPropagation(); showPlDropdown(e, video); };
+
     card.onclick = () => {
         cancelAutoplay();
-        playQueue = []; playQueueIdx = -1;
-        updateNowPlayingPanel();
-        playVideo(video, card);
+        // If we're in a playlist view, start the whole playlist from this video
+        if (queueVideos && queueVideos.length > 0) {
+            startQueuePlayback(queueVideos, idx);
+        } else {
+            // Single play (all-videos view)
+            playQueue = [];
+            playQueueIdx = -1;
+            updateNowPlayingPanel();
+            updateQueueBadge();
+            updateCardQueueMarkers();
+            playVideo(video, card);
+        }
     };
+
     return card;
 }
 
@@ -625,7 +755,6 @@ function renderSidebar() {
     const list = document.getElementById('playlist-list');
     list.innerHTML = '';
 
-    // "All" entry
     const allItem = document.createElement('div');
     allItem.className = 'pl-item' + (currentView === 'all' ? ' active' : '');
     allItem.innerHTML = `<span class="pl-icon">🎬</span><span class="pl-name">Toutes les vidéos</span><span class="pl-count">${allVideos.length}</span>`;
@@ -666,11 +795,8 @@ function renderSidebar() {
 function toggleFav(video, card) {
     const favPl = playlists.find(p => p.id === 'favs');
     const idx = favPl.videos.findIndex(v => v.embed_url === video.embed_url);
-    if (idx > -1) {
-        favPl.videos.splice(idx, 1);
-    } else {
-        favPl.videos.push(video);
-    }
+    if (idx > -1) favPl.videos.splice(idx, 1);
+    else favPl.videos.push(video);
     savePlaylists();
     renderSidebar();
     renderContent();
@@ -694,18 +820,12 @@ function showPlDropdown(e, video) {
         item.className = 'pl-drop-item' + (alreadyIn ? ' already-in' : '');
         item.textContent = (alreadyIn ? '✓ ' : '') + pl.name;
         item.onclick = () => {
-            if (!alreadyIn) {
-                pl.videos.push(video);
-                savePlaylists();
-                renderSidebar();
-                renderContent();
-            }
+            if (!alreadyIn) { pl.videos.push(video); savePlaylists(); renderSidebar(); renderContent(); }
             closeDropdown();
         };
         dropdown.appendChild(item);
     });
 
-    // position
     const top = rect.bottom + 6;
     let left = rect.left - 160;
     if (left < 8) left = 8;
@@ -722,14 +842,13 @@ function closeDropdown() {
 }
 
 // ═══════════════════════════════════════════════
-// MODAL (new / rename)
+// MODAL
 // ═══════════════════════════════════════════════
-let modalMode = 'create'; // 'create' | 'rename'
+let modalMode = 'create';
 let renamingPl = null;
 
 function openCreateModal() {
-    modalMode = 'create';
-    renamingPl = null;
+    modalMode = 'create'; renamingPl = null;
     document.getElementById('modal-title').textContent = 'Nouvelle playlist';
     document.getElementById('modal-confirm').textContent = 'Créer';
     document.getElementById('modal-input').value = '';
@@ -738,8 +857,7 @@ function openCreateModal() {
 }
 
 function openRenameModal(pl) {
-    modalMode = 'rename';
-    renamingPl = pl;
+    modalMode = 'rename'; renamingPl = pl;
     document.getElementById('modal-title').textContent = 'Renommer la playlist';
     document.getElementById('modal-confirm').textContent = 'Renommer';
     document.getElementById('modal-input').value = pl.name;
@@ -747,24 +865,17 @@ function openRenameModal(pl) {
     setTimeout(() => { const inp = document.getElementById('modal-input'); inp.focus(); inp.select(); }, 100);
 }
 
-function closeModal() {
-    document.getElementById('pl-modal').classList.remove('open');
-}
+function closeModal() { document.getElementById('pl-modal').classList.remove('open'); }
 
 function confirmModal() {
     const name = document.getElementById('modal-input').value.trim();
     if (!name) return;
-
     if (modalMode === 'create') {
-        const pl = { id: 'pl_' + Date.now(), name, videos: [] };
-        playlists.push(pl);
+        playlists.push({ id: 'pl_' + Date.now(), name, videos: [] });
     } else if (modalMode === 'rename' && renamingPl) {
         renamingPl.name = name;
     }
-    savePlaylists();
-    renderSidebar();
-    renderContent();
-    closeModal();
+    savePlaylists(); renderSidebar(); renderContent(); closeModal();
 }
 
 document.getElementById('btn-new-playlist').onclick = openCreateModal;
@@ -779,9 +890,7 @@ document.getElementById('pl-modal').onclick = e => { if (e.target === document.g
 function deletePlaylist(id) {
     playlists = playlists.filter(p => p.id !== id);
     if (currentView === id) currentView = 'all';
-    savePlaylists();
-    renderSidebar();
-    renderContent();
+    savePlaylists(); renderSidebar(); renderContent();
 }
 
 // ═══════════════════════════════════════════════
