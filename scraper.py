@@ -59,7 +59,7 @@ def get_xvideos_gay():
                     thumb = img_tag.get('data-src') or img_tag.get('src')
                     
                     # On construit l'URL de l'embed parfaite
-                    embed_url = f"https://www.xvideos.com/embedframe/{video_id}?mobile=0"
+                    embed_url = f"https://www.xvideos.com/embedframe/{video_id}"
                     raw_link = "https://www.xvideos.com" + href
                     
                     results.append({
