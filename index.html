@@ -37,23 +37,16 @@ function playVideo(url, element) {
     const playerContainer = document.getElementById('player-container');
     let embedUrl = "";
 
-    console.log("Tentative de lecture pour l'URL :", url); // Debug dans la console
-
-    if (!url) {
-        alert("URL manquante pour cette vidéo.");
-        return;
-    }
-
     try {
         if (url.includes('xvideos.com')) {
-            // Cette regex est plus large pour attraper l'ID peu importe le sous-domaine
-            const match = url.match(/video(\d+)/);
+            // Cette regex capture tout ce qui se trouve entre 'video.' ou 'video' et le prochain '/'
+            // Elle fonctionnera pour "video.okfvaldfd69" ou "video12345"
+            const match = url.match(/video\.?([^/]+)/);
             if (match && match[1]) {
                 embedUrl = `https://www.xvideos.com/embedframe/${match[1]}`;
             }
         } 
         else if (url.includes('xhamster.com')) {
-            // XHamster utilise souvent des IDs finissant par xh...
             const match = url.match(/(xh\w+)/);
             if (match && match[1]) {
                 embedUrl = `https://xhamster.com/embed/${match[1]}`;
@@ -61,7 +54,7 @@ function playVideo(url, element) {
         }
 
         if (embedUrl !== "") {
-            // On injecte l'iframe proprement
+            console.log("Lecture de l'embed :", embedUrl);
             playerContainer.innerHTML = `
                 <iframe src="${embedUrl}" 
                         width="100%" height="100%" 
@@ -69,17 +62,14 @@ function playVideo(url, element) {
                         allowfullscreen="true">
                 </iframe>`;
             
-            // Gestion visuelle de la sélection
             document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
             element.classList.add('active');
             window.scrollTo({top: 0, behavior: 'smooth'});
         } else {
-            // Si l'extraction échoue, on ouvre au moins le site original dans un nouvel onglet
-            console.error("Impossible d'extraire l'ID de :", url);
             window.open(url, '_blank');
         }
     } catch (err) {
-        console.error("Erreur critique dans playVideo:", err);
+        console.error(err);
         window.open(url, '_blank');
     }
 }
