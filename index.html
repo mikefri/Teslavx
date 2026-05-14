@@ -39,21 +39,20 @@ function playVideo(url, element) {
 
     if (!url) return;
 
-    // On s'assure que l'URL commence bien par https
+    // Force HTTPS pour éviter l'erreur "Mixed Content" de ta console
     url = url.replace("http://", "https://");
 
     try {
         if (url.includes('xvideos.com')) {
-            // Cette nouvelle regex isole plus précisément l'ID après 'video.' ou 'video'
-            // en s'arrêtant dès qu'elle croise un slash ou le mot 'home'
-            const match = url.match(/video\.?([^/]+)/);
+            // Cette regex va chercher tout ce qui est entre 'video.' et le slash suivant
+            // Exemple : video.okfvaldfd69 -> donnera okfvaldfd69
+            let match = url.match(/video\.([^/]+)/);
+            
+            // Si le format est plus classique (video12345)
+            if (!match) match = url.match(/video(\d+)/);
+
             if (match && match[1]) {
-                let videoId = match[1];
-                // Si l'ID contient un point (ex: okfval.69), on le garde tel quel
-                // Mais on nettoie si la regex a pris trop de texte
-                if (videoId.includes('home')) videoId = videoId.split('/')[0];
-                
-                embedUrl = `https://www.xvideos.com/embedframe/${videoId}`;
+                embedUrl = `https://www.xvideos.com/embedframe/${match[1]}`;
             }
         } 
         else if (url.includes('xhamster.com')) {
@@ -64,10 +63,7 @@ function playVideo(url, element) {
         }
 
         if (embedUrl !== "") {
-            // On force le HTTPS ici aussi pour éviter le Mixed Content
-            embedUrl = embedUrl.replace("http://", "https://");
-            
-            console.log("Tentative de lecture sécurisée :", embedUrl);
+            console.log("Lecture de l'embed corrigé :", embedUrl);
             
             playerContainer.innerHTML = `
                 <iframe src="${embedUrl}" 
@@ -81,10 +77,11 @@ function playVideo(url, element) {
             element.classList.add('active');
             window.scrollTo({top: 0, behavior: 'smooth'});
         } else {
+            console.log("Echec de l'ID, ouverture directe.");
             window.open(url, '_blank');
         }
     } catch (err) {
-        console.error("Erreur :", err);
+        console.error("Erreur de script :", err);
         window.open(url, '_blank');
     }
 }
