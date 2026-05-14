@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AdultDataLink Explorer</title>
+  <title>Lustpress Explorer - Gratuit</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -15,31 +15,11 @@
     header {
       background: #1a001a;
       padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      text-align: center;
       border-bottom: 3px solid #ff00aa;
-      flex-wrap: wrap;
-      gap: 10px;
     }
-    h1 { font-size: 1.8rem; }
-    .api-key {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    .api-key input {
-      padding: 8px 12px;
-      width: 280px;
-      background: #222;
-      border: 1px solid #ff00aa;
-      color: white;
-      border-radius: 6px;
-    }
-    .container {
-      display: flex;
-      min-height: calc(100vh - 70px);
-    }
+    h1 { font-size: 2rem; }
+    .container { display: flex; min-height: calc(100vh - 70px); }
     .sidebar {
       width: 260px;
       background: #1a001a;
@@ -65,16 +45,14 @@
     }
     .card:hover {
       transform: scale(1.04);
-      box-shadow: 0 0 15px rgba(255, 0, 170, 0.4);
+      box-shadow: 0 0 15px rgba(255, 0, 170, 0.5);
     }
     .card img {
       width: 100%;
       height: 170px;
       object-fit: cover;
     }
-    .card-info {
-      padding: 12px;
-    }
+    .card-info { padding: 12px; }
     .card-info h4 {
       font-size: 1rem;
       line-height: 1.3;
@@ -84,23 +62,19 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    select, input[type="text"] {
+    select, input[type="text"], button {
       width: 100%;
       padding: 10px;
-      margin: 8px 0;
+      margin: 10px 0;
       background: #222;
       border: 1px solid #555;
       color: white;
       border-radius: 6px;
     }
     button {
-      padding: 12px;
       background: #ff00aa;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
       font-weight: bold;
+      cursor: pointer;
     }
     button:hover { background: #ff3399; }
 
@@ -134,39 +108,26 @@
 </head>
 <body>
   <header>
-    <h1>🔞 AdultDataLink Explorer</h1>
-    <div class="api-key">
-      <input type="password" id="apiKey" placeholder="Ta clé RapidAPI ici">
-      <button onclick="saveApiKey()">Sauvegarder</button>
-    </div>
+    <h1>🔞 Lustpress Explorer (Gratuit - Sans carte)</h1>
   </header>
 
   <div class="container">
-    <!-- Sidebar -->
     <aside class="sidebar">
       <h3>Plateforme</h3>
       <select id="platform">
         <option value="pornhub">Pornhub</option>
         <option value="xvideos">XVideos</option>
         <option value="xhamster">XHamster</option>
-        <option value="erome">Erome</option>
-        <option value="redgifs">Redgifs</option>
+        <option value="xnxx">XNXX</option>
+        <option value="redtube">RedTube</option>
       </select>
 
       <h3>Recherche</h3>
-      <input type="text" id="searchQuery" placeholder="Ex: milf, creampie, ebony..." onkeypress="if(event.key==='Enter') searchVideos()">
+      <input type="text" id="searchQuery" placeholder="Ex: milf, hentai, creampie..." onkeypress="if(event.key==='Enter') searchVideos()">
 
-      <button onclick="searchVideos()" style="width:100%; margin:15px 0;">🔍 Rechercher</button>
-
-      <h3>Tri</h3>
-      <select id="sort">
-        <option value="relevance">Pertinence</option>
-        <option value="views">Plus vues</option>
-        <option value="newest">Plus récentes</option>
-      </select>
+      <button onclick="searchVideos()">🔍 Rechercher</button>
     </aside>
 
-    <!-- Résultats -->
     <main class="main-content">
       <div id="results" class="grid"></div>
     </main>
@@ -176,56 +137,32 @@
   <div id="modal" class="modal">
     <div class="modal-content">
       <span onclick="closeModal()" class="close">×</span>
-      <h2 id="modalTitle" style="margin-bottom:15px;"></h2>
+      <h2 id="modalTitle"></h2>
       <div id="modalVideo"></div>
-      <div id="modalDetails" style="margin-top:15px; color:#ccc;"></div>
+      <div id="modalDetails" style="margin-top:15px;"></div>
     </div>
   </div>
 
   <script>
-    let API_KEY = localStorage.getItem('adultApiKey') || '';
-    if (API_KEY) document.getElementById('apiKey').value = API_KEY;
-
-    function saveApiKey() {
-      API_KEY = document.getElementById('apiKey').value.trim();
-      if (API_KEY) {
-        localStorage.setItem('adultApiKey', API_KEY);
-        alert('✅ Clé API sauvegardée !');
-      }
-    }
+    const BASE_URL = "https://lustpress-production.up.railway.app";   // Instance publique
 
     async function searchVideos() {
-      if (!API_KEY) {
-        alert("⚠️ Entre d'abord ta clé RapidAPI");
-        return;
-      }
-
       const query = document.getElementById('searchQuery').value.trim() || "trending";
       const platform = document.getElementById('platform').value;
       const resultsDiv = document.getElementById('results');
 
-      resultsDiv.innerHTML = "<p style='color:#ff00aa; text-align:center; grid-column:1/-1;'>Chargement des vidéos...</p>";
+      resultsDiv.innerHTML = "<p style='color:#ff00aa; text-align:center; grid-column:1/-1;'>Chargement...</p>";
 
       try {
-        // À adapter selon la documentation exacte de AdultDataLink sur RapidAPI
-        const response = await fetch(`https://porn-api-adultdatalink.p.rapidapi.com/${platform}/search`, {
-          method: 'GET',
-          headers: {
-            'X-RapidAPI-Key': API_KEY,
-            'X-RapidAPI-Host': 'porn-api-adultdatalink.p.rapidapi.com'
-          }
-        });
-
-        if (!response.ok) throw new Error("Erreur API (vérifie ta clé)");
-
+        const response = await fetch(`${BASE_URL}/${platform}/search?key=${encodeURIComponent(query)}`);
         const data = await response.json();
 
         resultsDiv.innerHTML = '';
 
-        const videos = data.results || data.videos || data.data || [];
+        const videos = data.result || data.results || data.videos || [];
 
         if (videos.length === 0) {
-          resultsDiv.innerHTML = "<p>Aucun résultat trouvé.</p>";
+          resultsDiv.innerHTML = "<p>Aucun résultat.</p>";
           return;
         }
 
@@ -233,10 +170,10 @@
           const card = document.createElement('div');
           card.className = 'card';
           card.innerHTML = `
-            <img src="${video.thumbnail || video.image || 'https://via.placeholder.com/280x170/330033/ffffff?text=Video'}" alt="${video.title}">
+            <img src="${video.thumbnail || video.image || ''}" alt="${video.title}">
             <div class="card-info">
               <h4>${video.title || 'Sans titre'}</h4>
-              <small>Durée: ${video.duration || 'N/A'} | Vues: ${video.views ? Number(video.views).toLocaleString() : 'N/A'}</small>
+              <small>Durée: ${video.duration || 'N/A'}</small>
             </div>
           `;
           card.onclick = () => openVideoModal(video);
@@ -244,26 +181,21 @@
         });
 
       } catch (err) {
-        console.error(err);
-        resultsDiv.innerHTML = `<p style="color:red; grid-column:1/-1;">Erreur : ${err.message}<br><small>Vérifie ta clé API et ta connexion.</small></p>`;
+        resultsDiv.innerHTML = `<p style="color:red;">Erreur de connexion à Lustpress.<br>Essaie plus tard ou change de plateforme.</p>`;
       }
     }
 
     function openVideoModal(video) {
       document.getElementById('modalTitle').textContent = video.title || 'Vidéo';
-      
-      const videoUrl = video.video_url || video.direct_url || video.url || '';
+      const videoUrl = video.video_url || video.url || video.direct_url || '';
       
       document.getElementById('modalVideo').innerHTML = videoUrl 
         ? `<video controls autoplay><source src="${videoUrl}" type="video/mp4"></video>`
-        : `<p style="color:#ff00aa;">Aucun lien de lecture direct disponible.</p>`;
+        : `<p style="color:#ff00aa;">Aucun lien direct disponible sur cette vidéo.</p>`;
 
       document.getElementById('modalDetails').innerHTML = `
         <p><strong>Durée :</strong> ${video.duration || 'N/A'}</p>
-        <p><strong>Vues :</strong> ${video.views ? Number(video.views).toLocaleString() : 'N/A'}</p>
-        ${video.tags ? `<p><strong>Tags :</strong> ${video.tags}</p>` : ''}
       `;
-
       document.getElementById('modal').style.display = 'flex';
     }
 
@@ -271,11 +203,6 @@
       document.getElementById('modal').style.display = 'none';
       document.getElementById('modalVideo').innerHTML = '';
     }
-
-    // Chargement initial
-    window.onload = () => {
-      if (API_KEY) searchVideos();
-    };
   </script>
 </body>
 </html>
