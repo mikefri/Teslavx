@@ -1,151 +1,44 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NSFW Explorer - Gratuit</title>
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: Arial, sans-serif;
-      background: #0a0a0a;
-      color: #eee;
-      min-height: 100vh;
-    }
-    header {
-      background: #1a001a;
-      padding: 15px;
-      text-align: center;
-      border-bottom: 3px solid #ff00aa;
-    }
-    .container { display: flex; min-height: calc(100vh - 70px); }
-    .sidebar {
-      width: 280px;
-      background: #1a001a;
-      padding: 20px;
-      border-right: 1px solid #333;
-    }
-    .main-content { flex: 1; padding: 20px; overflow-y: auto; }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 18px;
-    }
-    .card {
-      background: #1f001f;
-      border-radius: 10px;
-      overflow: hidden;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .card:hover { transform: scale(1.05); }
-    .card img { width: 100%; height: 170px; object-fit: cover; }
-    .card-info { padding: 12px; }
-    input, select, button {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      background: #222;
-      border: 1px solid #555;
-      color: white;
-      border-radius: 6px;
-    }
-    button {
-      background: #ff00aa;
-      font-weight: bold;
-    }
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.97);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-content {
-      background: #1a001a;
-      width: 95%;
-      max-width: 900px;
-      border-radius: 12px;
-      padding: 20px;
-    }
-    .close { float: right; font-size: 36px; cursor: pointer; color: #ff00aa; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Hub Privé</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: white; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .card { background: #1e1e1e; border-radius: 8px; overflow: hidden; transition: transform 0.2s; }
+        .card:hover { transform: scale(1.03); }
+        .card img { width: 100%; height: 150px; object-fit: cover; }
+        .info { padding: 10px; }
+        .title { font-size: 0.9em; height: 40px; overflow: hidden; margin-bottom: 10px; }
+        .source-badge { font-size: 0.7em; background: #ff9900; color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .btn { display: block; text-align: center; background: #007bff; color: white; text-decoration: none; padding: 8px; border-radius: 4px; margin-top: 10px; }
+    </style>
 </head>
 <body>
-  <header>
-    <h1>🔞 NSFW Explorer (Sans API - Gratuit)</h1>
-  </header>
+    <h1>Flux Personnel Gay</h1>
+    <div id="gallery" class="grid">Chargement des vidéos...</div>
 
-  <div class="container">
-    <aside class="sidebar">
-      <h3>Plateforme</h3>
-      <select id="platform">
-        <option value="pornhub">Pornhub</option>
-        <option value="xvideos">XVideos</option>
-        <option value="xhamster">XHamster</option>
-      </select>
-
-      <h3>Recherche</h3>
-      <input type="text" id="searchQuery" placeholder="Ex: milf, gay, hentai..." onkeypress="if(event.key==='Enter') search()">
-      <button onclick="search()">🔍 Rechercher</button>
-    </aside>
-
-    <main class="main-content">
-      <div id="results" class="grid"></div>
-    </main>
-  </div>
-
-  <div id="modal" class="modal">
-    <div class="modal-content">
-      <span onclick="closeModal()" class="close">×</span>
-      <h2 id="modalTitle"></h2>
-      <div id="modalVideo"></div>
-    </div>
-  </div>
-
-  <script>
-    async function search() {
-      const query = document.getElementById('searchQuery').value.trim() || "trending";
-      const platform = document.getElementById('platform').value;
-      const resultsDiv = document.getElementById('results');
-
-      resultsDiv.innerHTML = "<p style='color:#ff00aa; text-align:center; grid-column:1/-1;'>Recherche en cours...</p>";
-
-      try {
-        let url = '';
-        if (platform === 'pornhub') {
-          url = `https://www.pornhub.com/video/search?search=${encodeURIComponent(query)}`;
-        } else if (platform === 'xvideos') {
-          url = `https://www.xvideos.com/?k=${encodeURIComponent(query)}`;
-        } else if (platform === 'xhamster') {
-          url = `https://xhamster.com/search/${encodeURIComponent(query)}`;
-        }
-
-        // Note : Cette méthode est limitée car les navigateurs bloquent souvent le cross-origin.
-        // Pour un vrai fonctionnement, il faut un proxy ou self-host.
-
-        resultsDiv.innerHTML = `<p style="color:orange;">La recherche directe est limitée par le navigateur.<br>
-        Essaie avec <strong>Pornhub</strong> ou utilise un outil comme <strong>Apify / Bright Data</strong> pour du scraping sérieux.</p>`;
-      } catch(e) {
-        resultsDiv.innerHTML = "<p>Erreur. Les sites bloquent souvent les requêtes directes.</p>";
-      }
-    }
-
-    function openVideoModal(videoUrl, title) {
-      document.getElementById('modalTitle').textContent = title;
-      document.getElementById('modalVideo').innerHTML = `
-        <video controls autoplay style="width:100%; max-height:70vh;">
-          <source src="${videoUrl}" type="video/mp4">
-        </video>`;
-      document.getElementById('modal').style.display = 'flex';
-    }
-
-    function closeModal() {
-      document.getElementById('modal').style.display = 'none';
-      document.getElementById('modalVideo').innerHTML = '';
-    }
-  </script>
+    <script>
+        fetch('data.json')
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('gallery');
+                container.innerHTML = '';
+                data.forEach(v => {
+                    container.innerHTML += `
+                        <div class="card">
+                            <img src="${v.thumb}" loading="lazy">
+                            <div class="info">
+                                <div class="title">${v.title}</div>
+                                <span class="source-badge">${v.source}</span>
+                                <a href="${v.link}" target="_blank" class="btn">Regarder</a>
+                            </div>
+                        </div>`;
+                });
+            })
+            .catch(err => { document.getElementById('gallery').innerHTML = "Erreur de chargement."; });
+    </script>
 </body>
 </html>
