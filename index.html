@@ -61,58 +61,31 @@
         const playerContainer = document.getElementById('player-container');
         const fallbackBtn = document.getElementById('fallback-button');
 
-        function playVideo(url, element) {
-            let embedUrl = "";
+function playVideo(index, element) {
+    // On récupère les données directement depuis notre liste JSON chargée
+    const video = videoData[index]; 
+    const playerContainer = document.getElementById('player-container');
+    const fallbackBtn = document.getElementById('fallback-button');
 
-            if (!url) return;
+    if (video.embed_url) {
+        playerContainer.innerHTML = `
+            <iframe src="${video.embed_url}" 
+                    width="100%" height="100%" 
+                    frameborder="0" allowfullscreen 
+                    allow="autoplay; fullscreen">
+            </iframe>`;
+        
+        // Bouton de secours
+        playerContainer.appendChild(fallbackBtn);
+        fallbackBtn.href = video.link;
+        fallbackBtn.style.display = "block";
 
-            // Nettoyage de l'URL
-            url = url.replace("http://", "https://");
-
-            try {
-                if (url.includes('xvideos.com')) {
-                    // Regex chirurgicale pour capturer l'ID après 'video.' ou 'video'
-                    let match = url.match(/video\.?([^/]+)/);
-                    if (match && match[1]) {
-                        // On ajoute ?type=video pour forcer le lecteur
-                        embedUrl = `https://www.xvideos.com/embedframe/${match[1]}?type=video`;
-                    }
-                } 
-                else if (url.includes('xhamster.com')) {
-                    const match = url.match(/(xh\w+)/);
-                    if (match && match[1]) {
-                        embedUrl = `https://xhamster.com/embed/${match[1]}`;
-                    }
-                }
-
-                if (embedUrl !== "") {
-                    console.log("Tentative de lecture :", embedUrl);
-                    
-                    // Mise à jour de l'iframe
-                    playerContainer.innerHTML = `
-                        <iframe src="${embedUrl}" 
-                                frameborder="0" 
-                                allowfullscreen 
-                                allow="autoplay; fullscreen; picture-in-picture">
-                        </iframe>`;
-                    
-                    // On remet le bouton de secours par dessus l'iframe au cas où
-                    playerContainer.appendChild(fallbackBtn);
-                    fallbackBtn.href = url;
-                    fallbackBtn.style.display = "block"; // On l'affiche
-                    
-                    // Style visuel
-                    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
-                    element.classList.add('active');
-                    window.scrollTo({top: 0, behavior: 'smooth'});
-                } else {
-                    window.open(url, '_blank');
-                }
-            } catch (err) {
-                console.error("Erreur :", err);
-                window.open(url, '_blank');
-            }
-        }
+        // Style
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+        element.classList.add('active');
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+}
 
         // Chargement des données
         fetch('data.json')
