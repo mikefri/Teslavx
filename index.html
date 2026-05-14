@@ -1,309 +1,258 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Eporner Playlist</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root {
-      --red: #e8132b;
-      --red-dark: #b50f22;
-      --bg: #0a0a0a;
-      --surface: #111111;
-      --surface2: #1a1a1a;
-      --border: #2a2a2a;
-      --text: #f0f0f0;
-      --muted: #666;
+      --red:#e8132b; --red-dark:#b50f22;
+      --bg:#080808; --surface:#111; --surface2:#181818; --surface3:#202020;
+      --border:#252525; --border2:#333;
+      --text:#f0f0f0; --muted:#555; --muted2:#888;
     }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
+    .bebas{font-family:'Bebas Neue',sans-serif;letter-spacing:.05em}
+    ::-webkit-scrollbar{width:3px;height:3px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+    .lc1{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+    .lc2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
-    * { box-sizing: border-box; }
+    .inp{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 13px;font-size:13px;font-family:'DM Sans',sans-serif;transition:border-color .2s;width:100%}
+    .inp:focus{outline:none;border-color:var(--red)}
+    select.inp{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      min-height: 100vh;
-    }
+    .btn-red{background:var(--red);color:#fff;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:500;transition:background .15s;border:none;cursor:pointer;white-space:nowrap}
+    .btn-red:hover{background:var(--red-dark)}
+    .btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:7px;padding:8px 14px;font-size:12px;font-weight:500;transition:all .15s;cursor:pointer;white-space:nowrap}
+    .btn-ghost:hover{border-color:var(--border2);background:var(--surface3)}
+    .btn-icon{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:7px 10px;cursor:pointer;transition:all .15s;font-size:14px;line-height:1;color:var(--text)}
+    .btn-icon:hover{border-color:var(--border2)}
 
-    h1, .bebas { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.04em; }
+    .nav-tab{padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--muted2);transition:all .15s;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none}
+    .nav-tab.active{color:var(--text);border-bottom-color:var(--red)}
+    .nav-tab:hover:not(.active){color:var(--text)}
 
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .vcard{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .15s}
+    .vcard:hover{border-color:var(--red);transform:translateY(-2px)}
+    .tag{font-size:10px;color:var(--muted2);background:var(--surface2);border-radius:4px;padding:2px 6px}
 
-    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+    .vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:12px}
 
-    .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .pl-tab{padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--muted2);transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:5px}
+    .pl-tab.active{background:var(--red);border-color:var(--red);color:#fff}
+    .pl-tab:not(.active):hover{border-color:var(--border2);color:var(--text)}
 
-    /* Search */
-    .search-input {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text);
-      transition: border-color 0.2s;
-    }
-    .search-input:focus { outline: none; border-color: var(--red); }
+    .pl-item{display:flex;gap:9px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;cursor:pointer;transition:border-color .15s;position:relative}
+    .pl-item:hover{border-color:var(--border2)}
+    .pl-item.playing{border-color:var(--red);background:rgba(232,19,43,.06)}
+    .pl-item.dead{opacity:.4;border-color:#7f1d1d}
+    .dead-badge{position:absolute;top:5px;right:5px;background:#7f1d1d;color:#fca5a5;font-size:9px;padding:2px 5px;border-radius:3px;font-weight:600;letter-spacing:.03em}
 
-    /* Card */
-    .video-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-      transition: border-color 0.2s, transform 0.15s;
-      cursor: pointer;
-    }
-    .video-card:hover { border-color: var(--red); transform: translateY(-2px); }
+    #playerWrap{background:#000;border-radius:0;overflow:hidden}
+    .dot-anim{width:7px;height:7px;border-radius:50%;background:var(--red);animation:blink 1.2s infinite;flex-shrink:0}
+    @keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.65)}}
 
-    /* Playlist tabs */
-    .playlist-tab {
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--muted);
-      transition: all 0.15s;
-      white-space: nowrap;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .playlist-tab.active { background: var(--red); border-color: var(--red); color: white; }
-    .playlist-tab:not(.active):hover { border-color: #444; color: var(--text); }
+    #nextBanner{background:#0c0c0c;border-top:1px solid var(--border);padding:11px 14px;align-items:center;gap:11px;display:none}
+    #nextBanner.on{display:flex}
+    #cRing{width:38px;height:38px;position:relative;flex-shrink:0}
+    #cRing svg{transform:rotate(-90deg)}
+    #cRing circle{fill:none;stroke-width:3;stroke-linecap:round;transition:stroke-dashoffset 1s linear}
+    #cRing .tr{stroke:var(--border)}
+    #cRing .fi{stroke:var(--red)}
+    #cNum{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
 
-    /* Playlist item */
-    .pl-item {
-      display: flex;
-      gap: 10px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px;
-      cursor: pointer;
-      transition: border-color 0.15s;
-    }
-    .pl-item:hover { border-color: #444; }
-    .pl-item.playing { border-color: var(--red); background: rgba(232,19,43,0.07); }
+    .tog{position:relative;display:inline-flex;align-items:center;cursor:pointer;gap:7px;font-size:12px;color:var(--muted2)}
+    .tog input{display:none}
+    .tog-tr{width:30px;height:17px;border-radius:9px;background:var(--border);transition:background .2s;flex-shrink:0}
+    .tog input:checked~.tog-tr{background:var(--red)}
+    .tog-th{position:absolute;left:3px;top:3px;width:11px;height:11px;border-radius:50%;background:#fff;transition:left .2s;pointer-events:none}
+    .tog input:checked~.tog-tr .tog-th{left:16px}
 
-    /* Btn */
-    .btn-red { background: var(--red); color: white; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 500; transition: background 0.15s; }
-    .btn-red:hover { background: var(--red-dark); }
-    .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 500; transition: all 0.15s; }
-    .btn-ghost:hover { border-color: #555; background: #222; }
+    #toast{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--border2);border-radius:9px;padding:11px 16px;font-size:13px;z-index:300;transform:translateY(70px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;max-width:280px}
+    #toast.show{transform:translateY(0);opacity:1}
 
-    /* Modal */
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.8);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 100; backdrop-filter: blur(4px);
-    }
-    .modal-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 24px;
-      width: 340px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-    }
+    .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(5px)}
+    .modal-bx{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:24px;width:360px;box-shadow:0 24px 60px rgba(0,0,0,.7)}
 
-    /* Dropdown add-to */
-    .dropdown {
-      position: absolute;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
-      z-index: 50;
-      min-width: 200px;
-      overflow: hidden;
-    }
-    .dropdown-item { padding: 10px 14px; font-size: 13px; cursor: pointer; transition: background 0.1s; }
-    .dropdown-item:hover { background: var(--surface2); }
+    .dd{position:fixed;background:var(--surface);border:1px solid var(--border2);border-radius:9px;box-shadow:0 10px 28px rgba(0,0,0,.7);z-index:150;min-width:200px;overflow:hidden}
+    .dd-item{padding:10px 14px;font-size:13px;cursor:pointer;transition:background .1s;display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .dd-item:hover{background:var(--surface2)}
 
-    /* Player */
-    #playerContainer { background: #000; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+    .detail-stat{background:var(--surface2);border-radius:8px;padding:10px 14px;text-align:center}
+    .detail-stat .val{font-size:18px;font-weight:600;line-height:1}
+    .detail-stat .lbl{font-size:10px;color:var(--muted2);margin-top:3px;text-transform:uppercase;letter-spacing:.05em}
 
-    /* Now playing indicator */
-    .now-playing-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); animation: pulse 1.2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.7)} }
+    .page-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;transition:all .15s}
+    .page-btn:hover:not(:disabled){border-color:var(--border2);background:var(--surface2)}
+    .page-btn:disabled{opacity:.3;cursor:not-allowed}
+    .page-btn.cur{background:var(--red);border-color:var(--red)}
 
-    /* Notification toast */
-    #toast {
-      position: fixed; bottom: 24px; right: 24px;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 10px; padding: 12px 18px;
-      font-size: 13px; z-index: 200;
-      transform: translateY(80px); opacity: 0;
-      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-      pointer-events: none;
-    }
-    #toast.show { transform: translateY(0); opacity: 1; }
+    .prog-bar{height:2px;background:var(--border);border-radius:1px;margin-top:6px}
+    .prog-fill{height:100%;background:var(--red);border-radius:1px;transition:width .3s}
 
-    /* Progress bar in playlist */
-    .progress-bar { height: 2px; background: var(--border); border-radius: 1px; margin-top: 6px; }
-    .progress-fill { height: 100%; background: var(--red); border-radius: 1px; transition: width 0.3s; }
-
-    input[type="text"] { font-family: 'DM Sans', sans-serif; }
-
-    /* Auto-advance banner */
-    #nextUpBanner {
-      background: #0d0d0d;
-      border-top: 1px solid var(--border);
-      padding: 12px 16px;
-      display: none;
-      align-items: center;
-      gap: 12px;
-    }
-    #nextUpBanner.visible { display: flex; }
-
-    #autoCountdownRing {
-      width: 40px; height: 40px;
-      position: relative; flex-shrink: 0;
-    }
-    #autoCountdownRing svg { transform: rotate(-90deg); }
-    #autoCountdownRing circle {
-      fill: none; stroke-width: 3;
-      stroke-linecap: round;
-      transition: stroke-dashoffset 1s linear;
-    }
-    #autoCountdownRing .track { stroke: var(--border); }
-    #autoCountdownRing .fill  { stroke: var(--red); }
-    #autoCountdownNum {
-      position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 600;
-    }
-
-    /* Toggle switch */
-    .toggle { position: relative; display: inline-flex; align-items: center; cursor: pointer; gap: 8px; font-size: 12px; color: var(--muted); }
-    .toggle input { display: none; }
-    .toggle-track {
-      width: 32px; height: 18px; border-radius: 9px;
-      background: var(--border); transition: background 0.2s; flex-shrink:0;
-    }
-    .toggle input:checked ~ .toggle-track { background: var(--red); }
-    .toggle-thumb {
-      position: absolute; left: 3px; top: 3px;
-      width: 12px; height: 12px; border-radius: 50%;
-      background: white; transition: left 0.2s;
-      pointer-events: none;
-    }
-    .toggle input:checked ~ .toggle-track .toggle-thumb { left: 17px; }
+    .spin{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;flex-shrink:0}
+    @keyframes spin{to{transform:rotate(360deg)}}
   </style>
 </head>
 <body>
 
-<div class="max-w-[1400px] mx-auto p-4 pb-16">
+<div style="max-width:1440px;margin:0 auto;padding:16px 16px 80px">
 
   <!-- Header -->
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="text-4xl" style="color:var(--red)">EPORNER</h1>
-    <span class="text-sm text-gray-500">Playlist Manager</span>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+    <h1 class="bebas" style="font-size:2.2rem;color:var(--red)">EPORNER</h1>
+    <span style="font-size:11px;color:var(--muted2)">Playlist Manager</span>
   </div>
 
-  <!-- Search -->
-  <div class="flex gap-2 mb-6">
-    <input id="searchInput" type="text" placeholder="Rechercher des vidéos…"
-           class="search-input flex-1 rounded-lg px-4 py-3 text-sm">
-    <button onclick="searchVideos()"
-            class="btn-red px-6 py-3 rounded-lg font-medium text-sm">Chercher</button>
+  <!-- Nav tabs -->
+  <div style="display:flex;border-bottom:1px solid var(--border);margin-bottom:18px;gap:2px">
+    <button class="nav-tab active" onclick="switchTab('search')" id="tabSearch">🔍 Recherche</button>
+    <button class="nav-tab" onclick="switchTab('lookup')" id="tabLookup">🎯 Par ID</button>
+    <button class="nav-tab" onclick="switchTab('health')" id="tabHealth">🩺 Santé</button>
   </div>
 
-  <div class="flex gap-5">
+  <div style="display:flex;gap:18px;align-items:flex-start">
 
-    <!-- Main -->
-    <div class="flex-1 min-w-0">
+    <!-- ══ MAIN ══ -->
+    <div style="flex:1;min-width:0">
 
-      <!-- Player -->
-      <div id="playerContainer" class="hidden mb-5">
-        <iframe id="videoPlayer" width="100%" height="480" allowfullscreen style="display:block"></iframe>
-        <div class="p-4 flex items-start justify-between gap-4" style="background:#0d0d0d">
-          <div>
-            <div class="flex items-center gap-2 mb-1">
-              <div class="now-playing-dot"></div>
-              <span class="text-xs text-red-400 font-medium uppercase tracking-widest">En lecture</span>
-            </div>
-            <h2 id="videoTitle" class="font-semibold text-base"></h2>
-          </div>
-          <div class="flex items-center gap-3 shrink-0">
-            <!-- Auto-advance toggle -->
-            <label class="toggle" title="Lecture automatique">
-              <input type="checkbox" id="autoToggle" checked onchange="onAutoToggleChange()">
-              <span class="toggle-track"><span class="toggle-thumb"></span></span>
-              <span>Auto</span>
-            </label>
-            <button onclick="playPrev()" class="btn-ghost text-xs px-3 py-2">⏮ Préc.</button>
-            <button onclick="playNext()" class="btn-ghost text-xs px-3 py-2">Suiv. ⏭</button>
-          </div>
+      <!-- ── SEARCH ── -->
+      <div id="panelSearch">
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <input id="searchInput" type="text" class="inp" placeholder="Rechercher des vidéos…" style="flex:1">
+          <button onclick="searchVideos(1)" class="btn-red" style="padding:9px 20px">Chercher</button>
         </div>
-
-        <!-- Next up banner -->
-        <div id="nextUpBanner">
-          <!-- Countdown ring -->
-          <div id="autoCountdownRing">
-            <svg width="40" height="40" viewBox="0 0 40 40">
-              <circle class="track" cx="20" cy="20" r="17"/>
-              <circle class="fill" id="ringFill" cx="20" cy="20" r="17"
-                stroke-dasharray="106.8" stroke-dashoffset="106.8"/>
-            </svg>
-            <div id="autoCountdownNum">—</div>
-          </div>
-          <!-- Next video info -->
-          <img id="nextThumb" src="" style="width:64px;height:42px;object-fit:cover;border-radius:5px;flex-shrink:0">
-          <div style="flex:1;min-width:0">
-            <p style="font-size:11px;color:var(--muted);margin-bottom:2px">Suivant</p>
-            <p id="nextTitle" class="line-clamp-1" style="font-size:13px;font-weight:500"></p>
-          </div>
-          <div class="flex gap-2 shrink-0">
-            <button onclick="playNext()" class="btn-red text-xs px-3 py-1.5">▶ Maintenant</button>
-            <button onclick="cancelAutoAdvance()" class="btn-ghost text-xs px-3 py-1.5">✕ Annuler</button>
-          </div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <select id="fOrder" class="inp" style="width:auto;flex:1;min-width:140px">
+            <option value="latest">⏰ Plus récentes</option>
+            <option value="oldest">📅 Plus anciennes</option>
+            <option value="top-rated">⭐ Mieux notées</option>
+            <option value="most-popular">🔥 Plus populaires</option>
+            <option value="longest">⏱ Plus longues</option>
+            <option value="shortest">⚡ Plus courtes</option>
+          </select>
+          <select id="fPer" class="inp" style="width:auto;flex:1;min-width:110px">
+            <option value="16">16 / page</option>
+            <option value="32" selected>32 / page</option>
+            <option value="48">48 / page</option>
+            <option value="64">64 / page</option>
+          </select>
+          <select id="fThumb" class="inp" style="width:auto;flex:1;min-width:145px">
+            <option value="big" selected>Miniatures grandes</option>
+            <option value="huge">Miniatures énormes</option>
+            <option value="medium">Miniatures moyennes</option>
+          </select>
         </div>
+        <div id="searchMeta" style="display:none;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:12px;color:var(--muted2);flex-wrap:wrap;gap:8px">
+          <span id="searchInfo"></span>
+          <div id="paginTop" style="display:flex;gap:4px;flex-wrap:wrap"></div>
+        </div>
+        <div id="videoGrid" class="vgrid"></div>
+        <div id="paginBot" style="display:none;justify-content:center;gap:5px;margin-top:18px;flex-wrap:wrap"></div>
       </div>
 
-      <!-- Grid -->
-      <div id="videoGrid" class="video-grid"></div>
+      <!-- ── LOOKUP ── -->
+      <div id="panelLookup" style="display:none">
+        <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:10px">Chercher par ID Eporner</p>
+        <div style="display:flex;gap:8px;margin-bottom:20px">
+          <input id="lookupInput" type="text" class="inp" placeholder="Ex: EbxnAMQwbGS" style="flex:1">
+          <button onclick="lookupById()" class="btn-red" style="padding:9px 20px">Chercher</button>
+        </div>
+        <div id="detailPanel" style="display:none;background:var(--surface);border:1px solid var(--border2);border-radius:12px;overflow:hidden"></div>
+        <p id="lookupEmpty" style="color:var(--muted2);font-size:13px;display:none">Aucune vidéo trouvée pour cet ID.</p>
+      </div>
+
+      <!-- ── HEALTH ── -->
+      <div id="panelHealth" style="display:none">
+        <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:10px">Vérification des vidéos supprimées</p>
+        <p style="font-size:13px;color:var(--muted2);margin-bottom:16px;line-height:1.6">
+          Télécharge la liste officielle des vidéos supprimées depuis l'API Eporner et marque les entrées mortes dans toutes vos playlists.
+        </p>
+        <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+          <button onclick="runHealthCheck()" class="btn-red" id="btnHealth">🩺 Lancer la vérification</button>
+          <button onclick="removeDeadFromAll()" class="btn-ghost" id="btnRemoveDead" style="display:none">🗑 Supprimer les vidéos mortes</button>
+        </div>
+        <div id="healthResult"></div>
+      </div>
+
     </div>
 
-    <!-- Sidebar -->
-    <div style="width:340px; flex-shrink:0">
-      <div style="background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; position:sticky; top:16px;">
+    <!-- ══ SIDEBAR ══ -->
+    <div style="width:330px;flex-shrink:0;position:sticky;top:12px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:13px;overflow:hidden">
 
-        <!-- Playlist header -->
-        <div class="p-4" style="border-bottom:1px solid var(--border)">
-          <div class="flex items-center justify-between mb-3">
-            <h2 class="font-semibold text-sm">MES PLAYLISTS</h2>
-            <button onclick="openCreateModal()" class="btn-red text-xs px-3 py-1.5">+ Nouvelle</button>
+        <!-- Header -->
+        <div style="padding:12px 12px 8px;border-bottom:1px solid var(--border)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px">
+            <span style="font-size:12px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em">Playlists</span>
+            <button onclick="openCreateModal()" class="btn-red" style="padding:4px 10px;font-size:11px">+ Nouvelle</button>
           </div>
-          <!-- Tabs -->
-          <div id="playlistTabs" class="flex gap-2 overflow-x-auto pb-1" style="scrollbar-width:none"></div>
+          <div id="playlistTabs" style="display:flex;gap:5px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none"></div>
         </div>
 
-        <!-- Active playlist info -->
-        <div id="plHeader" class="px-4 py-3 flex items-center justify-between" style="border-bottom:1px solid var(--border); display:none!important">
-          <div>
-            <p id="plName" class="font-semibold text-sm"></p>
-            <p id="plCount" class="text-xs" style="color:var(--muted)"></p>
+        <!-- Toolbar -->
+        <div style="padding:9px 11px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:6px">
+          <div style="min-width:0">
+            <p id="plName" style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></p>
+            <p id="plCount" style="font-size:11px;color:var(--muted2)"></p>
           </div>
-          <div class="flex gap-2">
-            <button onclick="playAll()" class="btn-red text-xs px-3 py-1.5">▶ Tout lire</button>
-            <button onclick="openRenameModal()" class="btn-ghost text-xs px-2 py-1.5">✏</button>
-            <button onclick="deleteCurrentPlaylist()" class="btn-ghost text-xs px-2 py-1.5" style="color:#e84343">🗑</button>
+          <div style="display:flex;gap:4px;flex-shrink:0">
+            <button onclick="playAll()" class="btn-red" style="font-size:11px;padding:5px 9px">▶ Tout</button>
+            <button onclick="openRenameModal()" class="btn-icon" title="Renommer">✏️</button>
+            <button onclick="deleteCurrentPlaylist()" class="btn-icon" style="color:#e84343" title="Supprimer">🗑</button>
           </div>
         </div>
 
-        <!-- Playlist items -->
-        <div id="playlistItems" class="overflow-auto p-3 space-y-2" style="max-height:55vh"></div>
+        <!-- Mini player -->
+        <div id="playerWrap" style="display:none">
+          <iframe id="videoPlayer" width="100%" height="190" allowfullscreen style="display:block;border:0"></iframe>
+          <div style="padding:10px 12px;background:#0a0a0a">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+              <div class="dot-anim"></div>
+              <span style="font-size:10px;color:var(--red);font-weight:600;text-transform:uppercase;letter-spacing:.06em">En lecture</span>
+            </div>
+            <p id="videoTitle" class="lc2" style="font-size:12px;font-weight:500;line-height:1.4"></p>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+              <div style="display:flex;gap:5px">
+                <button onclick="playPrev()" class="btn-ghost" style="padding:4px 9px;font-size:11px">⏮</button>
+                <button onclick="playNext()" class="btn-ghost" style="padding:4px 9px;font-size:11px">⏭</button>
+              </div>
+              <label class="tog">
+                <input type="checkbox" id="autoToggle" checked onchange="onAutoChange()">
+                <span class="tog-tr"><span class="tog-th"></span></span>
+                <span>Auto</span>
+              </label>
+            </div>
+          </div>
+          <!-- Next-up banner -->
+          <div id="nextBanner">
+            <div id="cRing">
+              <svg width="38" height="38" viewBox="0 0 38 38"><circle class="tr" cx="19" cy="19" r="16"/><circle class="fi" id="rFill" cx="19" cy="19" r="16" stroke-dasharray="100.5" stroke-dashoffset="100.5"/></svg>
+              <div id="cNum">—</div>
+            </div>
+            <img id="nThumb" src="" style="width:56px;height:37px;object-fit:cover;border-radius:5px;flex-shrink:0">
+            <div style="flex:1;min-width:0">
+              <p style="font-size:10px;color:var(--muted2);margin-bottom:2px">Suivant</p>
+              <p id="nTitle" class="lc1" style="font-size:12px;font-weight:500"></p>
+            </div>
+            <div style="display:flex;gap:4px;flex-shrink:0">
+              <button onclick="playNext()" class="btn-red" style="font-size:11px;padding:5px 8px">▶</button>
+              <button onclick="cancelAuto()" class="btn-ghost" style="font-size:11px;padding:5px 8px">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Items -->
+        <div id="playlistItems" style="max-height:420px;overflow-y:auto;padding:8px"></div>
 
         <!-- Footer -->
-        <div class="p-3" style="border-top:1px solid var(--border)">
-          <button onclick="clearCurrentPlaylist()" class="btn-ghost w-full text-xs py-2">Vider cette playlist</button>
+        <div style="padding:9px 11px;border-top:1px solid var(--border)">
+          <button onclick="clearCurrentPlaylist()" class="btn-ghost" style="width:100%;font-size:11px;padding:7px">Vider cette playlist</button>
         </div>
       </div>
     </div>
@@ -311,434 +260,373 @@
   </div>
 </div>
 
-<!-- Dropdown add-to -->
-<div id="addDropdown" class="dropdown hidden" style="position:fixed"></div>
+<div id="addDropdown" class="dd" style="display:none"></div>
 
-<!-- Modal -->
-<div id="modal" class="modal-overlay hidden">
-  <div class="modal-box">
-    <h3 id="modalTitle" class="font-semibold text-base mb-4"></h3>
-    <input id="modalInput" type="text" class="search-input w-full rounded-lg px-3 py-2.5 text-sm mb-4" placeholder="Nom de la playlist…">
-    <div class="flex gap-2 justify-end">
-      <button onclick="closeModal()" class="btn-ghost px-4 py-2">Annuler</button>
-      <button id="modalConfirm" class="btn-red px-4 py-2">Créer</button>
+<div id="modal" class="modal-ov" style="display:none">
+  <div class="modal-bx">
+    <h3 id="modalTitle" style="font-size:15px;font-weight:600;margin-bottom:16px"></h3>
+    <input id="modalInput" type="text" class="inp" style="margin-bottom:14px" placeholder="Nom de la playlist…">
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button onclick="closeModal()" class="btn-ghost">Annuler</button>
+      <button id="modalConfirm" class="btn-red"></button>
     </div>
   </div>
 </div>
 
-<!-- Toast -->
 <div id="toast"></div>
 
 <script>
-  // ─── State ────────────────────────────────────────────────────────────────
-  let playlists = JSON.parse(localStorage.getItem('eplaylists') || '{}');
-  let activePlaylistId = localStorage.getItem('eplActiveId') || null;
-  let currentVideoId = null;
-  let currentPlayingIndex = -1;
-  let modalMode = 'create'; // 'create' | 'rename'
+// ══════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════
+let playlists  = JSON.parse(localStorage.getItem('epl_v3')||'{}');
+let activePlId = localStorage.getItem('epl_active')||null;
+let currentVid = null, currentIdx = -1;
+let modalMode  = 'create', pendingAdd = null;
+let lastSearch = {query:'',page:1,order:'latest',per:32,thumb:'big',total:0};
+let deadSet    = new Set(), deadLoaded = false;
 
-  // Ensure at least one default playlist
-  if (Object.keys(playlists).length === 0) {
-    const id = uid();
-    playlists[id] = { name: 'Ma playlist', videos: [] };
-    activePlaylistId = id;
-    save();
+if (!Object.keys(playlists).length) {
+  const id=uid(); playlists[id]={name:'Ma playlist',videos:[]}; activePlId=id; save();
+}
+if (!activePlId||!playlists[activePlId]) activePlId=Object.keys(playlists)[0];
+
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6) }
+function save(){ localStorage.setItem('epl_v3',JSON.stringify(playlists)); localStorage.setItem('epl_active',activePlId) }
+function activePl(){ return playlists[activePlId]||null }
+
+// ══════════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════════
+function switchTab(tab) {
+  ['search','lookup','health'].forEach(t=>{
+    document.getElementById('panel'+cap(t)).style.display = t===tab?'block':'none';
+    document.getElementById('tab'+cap(t)).classList.toggle('active',t===tab);
+  });
+}
+function cap(s){ return s[0].toUpperCase()+s.slice(1) }
+
+// ══════════════════════════════════════════════════
+// ① SEARCH  /api/v2/video/search/
+// ══════════════════════════════════════════════════
+async function searchVideos(page=1) {
+  const q=document.getElementById('searchInput').value.trim();
+  if (!q) return toast('Entre un mot-clé 🔍');
+  const order=document.getElementById('fOrder').value;
+  const per  =document.getElementById('fPer').value;
+  const thumb=document.getElementById('fThumb').value;
+  lastSearch={query:q,page,order,per:+per,thumb,total:0};
+
+  const grid=document.getElementById('videoGrid');
+  grid.innerHTML=`<div style="grid-column:1/-1;display:flex;align-items:center;gap:10px;color:var(--muted2);font-size:13px;padding:10px 0"><div class="spin"></div> Recherche…</div>`;
+  document.getElementById('searchMeta').style.display='none';
+  document.getElementById('paginBot').style.display='none';
+  try {
+    const url=`https://www.eporner.com/api/v2/video/search/?query=${encodeURIComponent(q)}&per_page=${per}&page=${page}&thumbsize=${thumb}&order=${order}&format=json`;
+    const data=await (await fetch(url)).json();
+    const videos=data.videos||[];
+    lastSearch.total=data.total||0;
+    const totalPages=Math.ceil(lastSearch.total/lastSearch.per);
+
+    const meta=document.getElementById('searchMeta');
+    meta.style.display='flex';
+    document.getElementById('searchInfo').textContent=`${lastSearch.total.toLocaleString('fr-FR')} résultats — page ${page}/${totalPages||1}`;
+    buildPagination(page,totalPages);
+
+    grid.innerHTML='';
+    if (!videos.length){ grid.innerHTML='<p style="color:var(--muted2);font-size:13px;grid-column:1/-1;padding:10px 0">Aucun résultat.</p>'; return; }
+    videos.forEach(v=>grid.appendChild(buildCard(v)));
+  } catch(e){
+    grid.innerHTML='<p style="color:var(--red);font-size:13px;grid-column:1/-1;padding:10px 0">Erreur de connexion.</p>';
   }
-  if (!activePlaylistId || !playlists[activePlaylistId]) {
-    activePlaylistId = Object.keys(playlists)[0];
-  }
+}
 
-  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
-  function save() {
-    localStorage.setItem('eplaylists', JSON.stringify(playlists));
-    localStorage.setItem('eplActiveId', activePlaylistId);
-  }
-  function activePl() { return playlists[activePlaylistId] || null; }
+function buildCard(v) {
+  const c=document.createElement('div'); c.className='vcard';
+  const stars = v.rating ? `<span style="color:#f59e0b;font-size:11px">★</span><span style="font-size:11px"> ${v.rating}%</span>` : '';
+  const views  = v.views  ? `<span class="tag">👁 ${fmtNum(v.views)}</span>` : '';
+  const added  = v.added  ? `<span class="tag">📅 ${fmtDate(v.added)}</span>` : '';
+  c.innerHTML=`
+    <div style="position:relative">
+      <img src="${esc(v.thumb)}" loading="lazy" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block">
+      <span style="position:absolute;bottom:5px;right:5px;background:rgba(0,0,0,.85);font-size:10px;padding:2px 6px;border-radius:4px">${esc(v.length||'')}</span>
+    </div>
+    <div style="padding:9px">
+      <p class="lc2" style="font-size:12px;font-weight:500;margin-bottom:6px;min-height:32px">${esc(v.title)}</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span>${stars}</span>${views}
+      </div>
+      ${added?`<div style="margin-bottom:7px">${added}</div>`:''}
+      <div style="display:flex;gap:6px">
+        <button onclick="playVideo('${esc(v.id)}','${escQ(v.title)}');event.stopPropagation()" class="btn-red" style="flex:1;padding:7px 0">▶ Lire</button>
+        <button onclick="showAddDd(event,'${esc(v.id)}','${escQ(v.title)}','${esc(v.thumb)}')" class="btn-ghost" style="flex:1;padding:7px 0">+ Ajouter</button>
+      </div>
+    </div>`;
+  return c;
+}
 
-  // ─── Init ─────────────────────────────────────────────────────────────────
-  renderTabs();
-  renderPlaylistItems();
+function buildPagination(current, total) {
+  if (total<=1){ document.getElementById('paginBot').style.display='none'; document.getElementById('paginTop').innerHTML=''; return; }
+  const make=(container)=>{
+    container.innerHTML='';
+    const addBtn=(label,page,cur=false,dis=false)=>{
+      const b=document.createElement('button'); b.className='page-btn'+(cur?' cur':'');
+      b.textContent=label; b.disabled=dis; b.onclick=()=>searchVideos(page); container.appendChild(b);
+    };
+    const dot=()=>{ const s=document.createElement('span'); s.textContent='…'; s.style.cssText='padding:4px;color:var(--muted2);font-size:12px;line-height:30px'; container.appendChild(s); };
+    addBtn('‹',current-1,false,current<=1);
+    let start=Math.max(1,current-2), end=Math.min(total,start+4);
+    if(end-start<4) start=Math.max(1,end-4);
+    if(start>1){ addBtn('1',1); if(start>2) dot(); }
+    for(let p=start;p<=end;p++) addBtn(p,p,p===current);
+    if(end<total){ if(end<total-1) dot(); addBtn(total,total); }
+    addBtn('›',current+1,false,current>=total);
+  };
+  make(document.getElementById('paginTop'));
+  const bot=document.getElementById('paginBot'); bot.style.display='flex'; make(bot);
+}
 
-  // ─── Search ───────────────────────────────────────────────────────────────
-  async function searchVideos() {
-    const query = document.getElementById('searchInput').value.trim();
-    if (!query) return toast('Entre un mot-clé 🔍');
-    const grid = document.getElementById('videoGrid');
-    grid.innerHTML = '<p style="color:var(--muted);font-size:14px;grid-column:1/-1">Recherche en cours…</p>';
-    try {
-      const res = await fetch(`https://www.eporner.com/api/v2/video/search/?query=${encodeURIComponent(query)}&per_page=32&thumbsize=big&order=latest`);
-      const data = await res.json();
-      grid.innerHTML = '';
-      (data.videos || []).forEach(video => {
-        const card = document.createElement('div');
-        card.className = 'video-card';
-        card.innerHTML = `
-          <div style="position:relative">
-            <img src="${esc(video.thumb)}" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block">
-            <span style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.75);font-size:11px;padding:2px 6px;border-radius:4px">${esc(video.length)}</span>
-          </div>
-          <div class="p-3">
-            <p class="line-clamp-2 text-sm font-medium mb-2" style="min-height:36px">${esc(video.title)}</p>
-            <div class="flex gap-2">
-              <button onclick="playVideo('${esc(video.id)}','${escQ(video.title)}')" class="btn-red flex-1 py-2">▶ Lire</button>
-              <button onclick="showAddDropdown(event,'${esc(video.id)}','${escQ(video.title)}','${esc(video.thumb)}')" class="btn-ghost flex-1 py-2">+ Ajouter</button>
-            </div>
-          </div>`;
-        grid.appendChild(card);
-      });
-      if (!data.videos?.length) grid.innerHTML = '<p style="color:var(--muted);font-size:14px;grid-column:1/-1">Aucun résultat.</p>';
-    } catch { grid.innerHTML = '<p style="color:var(--red);font-size:14px;grid-column:1/-1">Erreur de connexion.</p>'; }
-  }
+// ══════════════════════════════════════════════════
+// ② LOOKUP  /api/v2/video/id/{id}/
+// ══════════════════════════════════════════════════
+async function lookupById() {
+  const id=document.getElementById('lookupInput').value.trim();
+  if (!id) return toast('Entre un ID vidéo');
+  const panel=document.getElementById('detailPanel');
+  const empty=document.getElementById('lookupEmpty');
+  empty.style.display='none';
+  panel.innerHTML=`<div style="padding:20px;display:flex;align-items:center;gap:10px;color:var(--muted2);font-size:13px"><div class="spin"></div> Chargement…</div>`;
+  panel.style.display='block';
+  try {
+    const data=await (await fetch(`https://www.eporner.com/api/v2/video/id/${id}/?thumbsize=big&format=json`)).json();
+    const v=data.video||data;
+    if (!v||!v.id){ panel.style.display='none'; empty.style.display='block'; return; }
+    renderDetail(v,panel);
+  } catch { panel.innerHTML='<p style="color:var(--red);padding:16px;font-size:13px">Erreur de connexion.</p>'; }
+}
 
-  // ─── Auto-advance ─────────────────────────────────────────────────────────
-  let autoTimer = null;       // setInterval handle
-  let autoSecondsLeft = 0;
-  let autoDuration = 0;
-  let autoAdvanceCancelled = false;
+function renderDetail(v, container) {
+  const stat=(val,lbl)=>val?`<div class="detail-stat"><div class="val">${esc(String(val))}</div><div class="lbl">${lbl}</div></div>`:'';
+  const kws=(v.keywords||[]).map(k=>`<span style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:3px 8px;font-size:11px;color:var(--muted2)">${esc(k)}</span>`).join('');
+  container.innerHTML=`
+    <img src="${esc(v.thumb||'')}" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block">
+    <div style="padding:16px">
+      <p style="font-size:15px;font-weight:600;margin-bottom:12px">${esc(v.title||'')}</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-bottom:14px">
+        ${stat(v.length,'⏱ Durée')}${stat(v.rating?v.rating+'%':'','⭐ Note')}${stat(v.views?fmtNum(v.views):'','👁 Vues')}${stat(v.added?fmtDate(v.added):'','📅 Ajoutée')}
+      </div>
+      ${kws?`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px">${kws}</div>`:''}
+      <div style="display:flex;gap:8px">
+        <button onclick="playVideo('${esc(v.id)}','${escQ(v.title||'')}');switchTab('search')" class="btn-red" style="flex:1">▶ Lire</button>
+        <button onclick="showAddDd(event,'${esc(v.id)}','${escQ(v.title||'')}','${esc(v.thumb||'')}')" class="btn-ghost" style="flex:1">+ Ajouter</button>
+      </div>
+    </div>`;
+}
 
-  function parseDuration(str) {
-    // "1:23:45" or "12:34" or "45"
-    const parts = String(str).split(':').map(Number);
-    if (parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
-    if (parts.length === 2) return parts[0]*60 + parts[1];
-    return parts[0] || 0;
-  }
+// ══════════════════════════════════════════════════
+// ③ REMOVED  /api/v2/video/removed/
+// ══════════════════════════════════════════════════
+async function runHealthCheck() {
+  const btn=document.getElementById('btnHealth');
+  const res=document.getElementById('healthResult');
+  btn.disabled=true; btn.textContent='⏳ Chargement…';
+  res.innerHTML=`<div style="display:flex;align-items:center;gap:10px;color:var(--muted2);font-size:13px;padding:8px 0"><div class="spin"></div> Récupération de la liste officielle…</div>`;
+  try {
+    const data=await (await fetch('https://www.eporner.com/api/v2/video/removed/?format=json')).json();
+    const removed=data.removed||data.ids||[];
+    deadSet=new Set(removed.map(String)); deadLoaded=true;
 
-  function isAutoEnabled() { return document.getElementById('autoToggle').checked; }
-  function onAutoToggleChange() { if (!isAutoEnabled()) cancelAutoAdvance(); }
-
-  async function startAutoAdvance(videoId) {
-    cancelAutoAdvance();
-    autoAdvanceCancelled = false;
-    if (!isAutoEnabled()) return;
-
-    const pl = activePl();
-    if (!pl || currentPlayingIndex < 0 || currentPlayingIndex >= pl.videos.length - 1) return;
-
-    // Fetch duration from API
-    let duration = 0;
-    try {
-      const res = await fetch(`https://www.eporner.com/api/v2/video/id/${videoId}/`);
-      const data = await res.json();
-      duration = parseDuration(data.video?.length || data.length || 0);
-    } catch { duration = 0; }
-
-    if (autoAdvanceCancelled) return; // user cancelled while fetching
-
-    if (!duration || duration < 5) {
-      // API failed or too short — skip auto-advance
-      hideBanner();
-      return;
-    }
-
-    // Show next-up banner
-    const nextVideo = pl.videos[currentPlayingIndex + 1];
-    showBanner(nextVideo, duration);
-    autoDuration = duration;
-    autoSecondsLeft = duration;
-    updateRing(duration, duration);
-
-    autoTimer = setInterval(() => {
-      autoSecondsLeft--;
-      updateRing(autoSecondsLeft, autoDuration);
-      if (autoSecondsLeft <= 0) {
-        clearInterval(autoTimer);
-        autoTimer = null;
-        hideBanner();
-        playNext();
-      }
-    }, 1000);
-  }
-
-  function cancelAutoAdvance() {
-    autoAdvanceCancelled = true;
-    if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
-    hideBanner();
-  }
-
-  function showBanner(nextVideo, duration) {
-    const banner = document.getElementById('nextUpBanner');
-    document.getElementById('nextThumb').src = nextVideo.thumb;
-    document.getElementById('nextTitle').textContent = nextVideo.title;
-    banner.classList.add('visible');
-  }
-
-  function hideBanner() {
-    document.getElementById('nextUpBanner').classList.remove('visible');
-    document.getElementById('autoCountdownNum').textContent = '—';
-    const fill = document.getElementById('ringFill');
-    fill.style.strokeDashoffset = '106.8';
-  }
-
-  const CIRCUMFERENCE = 106.8;
-  function updateRing(left, total) {
-    const pct = total > 0 ? left / total : 0;
-    const offset = CIRCUMFERENCE * (1 - pct);
-    document.getElementById('ringFill').style.strokeDashoffset = offset;
-
-    // Show readable countdown: last 60 sec → "Xs", before → "Xm"
-    let label;
-    if (left > 3600)      label = `${Math.floor(left/3600)}h`;
-    else if (left > 60)   label = `${Math.floor(left/60)}m`;
-    else                   label = `${left}s`;
-    document.getElementById('autoCountdownNum').textContent = label;
-  }
-
-  // ─── Player ───────────────────────────────────────────────────────────────
-  function playVideo(id, title) {
-    cancelAutoAdvance();
-    currentVideoId = id;
-    document.getElementById('playerContainer').classList.remove('hidden');
-    document.getElementById('videoPlayer').src = `https://www.eporner.com/embed/${id}`;
-    document.getElementById('videoTitle').textContent = title;
-    // Update playing index from active playlist
-    const pl = activePl();
-    if (pl) currentPlayingIndex = pl.videos.findIndex(v => v.id === id);
-    renderPlaylistItems();
-    document.getElementById('playerContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    // Start auto-advance if in playlist
-    if (currentPlayingIndex >= 0) startAutoAdvance(id);
-  }
-
-  function playAll() {
-    const pl = activePl();
-    if (!pl || !pl.videos.length) return toast('La playlist est vide');
-    currentPlayingIndex = 0;
-    const v = pl.videos[0];
-    playVideo(v.id, v.title);
-  }
-
-  function playNext() {
-    const pl = activePl();
-    if (!pl) return;
-    if (currentPlayingIndex < pl.videos.length - 1) {
-      currentPlayingIndex++;
-      const v = pl.videos[currentPlayingIndex];
-      playVideo(v.id, v.title);
-    } else toast('Fin de la playlist');
-  }
-
-  function playPrev() {
-    const pl = activePl();
-    if (!pl) return;
-    if (currentPlayingIndex > 0) {
-      currentPlayingIndex--;
-      const v = pl.videos[currentPlayingIndex];
-      playVideo(v.id, v.title);
-    } else toast('Début de la playlist');
-  }
-
-  // ─── Add dropdown ─────────────────────────────────────────────────────────
-  function showAddDropdown(e, id, title, thumb) {
-    e.stopPropagation();
-    const dd = document.getElementById('addDropdown');
-    dd.innerHTML = '';
-    const rect = e.target.getBoundingClientRect();
-
-    // "Add to existing"
-    Object.entries(playlists).forEach(([pid, pl]) => {
-      const item = document.createElement('div');
-      item.className = 'dropdown-item';
-      const already = pl.videos.some(v => v.id === id);
-      item.innerHTML = `<span>${esc(pl.name)}</span> ${already ? '<span style="color:var(--muted);font-size:11px">✓ ajoutée</span>' : `<span style="color:var(--red);font-size:11px">+ Ajouter</span>`}`;
-      if (!already) item.onclick = () => { addToPlaylist(pid, id, title, thumb); closeDropdown(); };
-      else item.style.opacity = '0.5';
-      dd.appendChild(item);
-    });
-
-    // "New playlist"
-    const sep = document.createElement('div');
-    sep.style.cssText = 'height:1px;background:var(--border);margin:4px 0';
-    dd.appendChild(sep);
-    const newItem = document.createElement('div');
-    newItem.className = 'dropdown-item';
-    newItem.style.color = 'var(--red)';
-    newItem.textContent = '+ Nouvelle playlist';
-    newItem.onclick = () => { closeDropdown(); openCreateModal(id, title, thumb); };
-    dd.appendChild(newItem);
-
-    const top = rect.bottom + window.scrollY + 4;
-    const left = Math.min(rect.left, window.innerWidth - 220);
-    dd.style.cssText = `position:fixed;top:${rect.bottom+4}px;left:${left}px`;
-    dd.classList.remove('hidden');
-    setTimeout(() => document.addEventListener('click', closeDropdown, { once: true }), 10);
-  }
-
-  function closeDropdown() { document.getElementById('addDropdown').classList.add('hidden'); }
-
-  // ─── Playlist CRUD ────────────────────────────────────────────────────────
-  let pendingAdd = null; // { id, title, thumb }
-
-  function openCreateModal(vid, vtitle, vthumb) {
-    modalMode = 'create';
-    pendingAdd = vid ? { id: vid, title: vtitle, thumb: vthumb } : null;
-    document.getElementById('modalTitle').textContent = 'Nouvelle playlist';
-    document.getElementById('modalInput').value = '';
-    document.getElementById('modalConfirm').textContent = 'Créer';
-    document.getElementById('modalConfirm').onclick = confirmCreate;
-    document.getElementById('modal').classList.remove('hidden');
-    setTimeout(() => document.getElementById('modalInput').focus(), 50);
-  }
-
-  function openRenameModal() {
-    const pl = activePl();
-    if (!pl) return;
-    modalMode = 'rename';
-    document.getElementById('modalTitle').textContent = 'Renommer la playlist';
-    document.getElementById('modalInput').value = pl.name;
-    document.getElementById('modalConfirm').textContent = 'Renommer';
-    document.getElementById('modalConfirm').onclick = confirmRename;
-    document.getElementById('modal').classList.remove('hidden');
-    setTimeout(() => document.getElementById('modalInput').focus(), 50);
-  }
-
-  function closeModal() { document.getElementById('modal').classList.add('hidden'); pendingAdd = null; }
-
-  function confirmCreate() {
-    const name = document.getElementById('modalInput').value.trim();
-    if (!name) return;
-    const id = uid();
-    playlists[id] = { name, videos: [] };
-    activePlaylistId = id;
-    if (pendingAdd) { addToPlaylist(id, pendingAdd.id, pendingAdd.title, pendingAdd.thumb, true); }
-    save(); renderTabs(); renderPlaylistItems();
-    closeModal();
-    toast(`Playlist « ${name} » créée ✓`);
-  }
-
-  function confirmRename() {
-    const name = document.getElementById('modalInput').value.trim();
-    if (!name || !activePl()) return;
-    playlists[activePlaylistId].name = name;
-    save(); renderTabs(); renderPlaylistItems();
-    closeModal();
-    toast(`Renommée en « ${name} » ✓`);
-  }
-
-  function deleteCurrentPlaylist() {
-    const pl = activePl();
-    if (!pl) return;
-    if (Object.keys(playlists).length === 1) { clearCurrentPlaylist(); return; }
-    if (!confirm(`Supprimer la playlist « ${pl.name} » ?`)) return;
-    delete playlists[activePlaylistId];
-    activePlaylistId = Object.keys(playlists)[0];
-    save(); renderTabs(); renderPlaylistItems();
-    toast('Playlist supprimée');
-  }
-
-  function addToPlaylist(pid, id, title, thumb, skipSave) {
-    if (!playlists[pid]) return;
-    if (playlists[pid].videos.some(v => v.id === id)) { toast('Déjà dans cette playlist'); return; }
-    playlists[pid].videos.push({ id, title, thumb });
-    if (!skipSave) { save(); renderTabs(); renderPlaylistItems(); }
-    toast(`Ajouté à « ${playlists[pid].name} » ✓`);
-  }
-
-  function removeFromPlaylist(index) {
-    const pl = activePl();
-    if (!pl) return;
-    pl.videos.splice(index, 1);
-    if (currentPlayingIndex >= index) currentPlayingIndex--;
-    save(); renderPlaylistItems();
-  }
-
-  function clearCurrentPlaylist() {
-    const pl = activePl();
-    if (!pl || !pl.videos.length) return;
-    if (!confirm('Vider cette playlist ?')) return;
-    pl.videos = [];
-    currentPlayingIndex = -1;
-    save(); renderPlaylistItems();
-  }
-
-  function switchPlaylist(id) {
-    activePlaylistId = id;
-    currentPlayingIndex = -1;
-    save(); renderTabs(); renderPlaylistItems();
-  }
-
-  // ─── Render ───────────────────────────────────────────────────────────────
-  function renderTabs() {
-    const tabs = document.getElementById('playlistTabs');
-    tabs.innerHTML = '';
-    Object.entries(playlists).forEach(([id, pl]) => {
-      const t = document.createElement('button');
-      t.className = 'playlist-tab' + (id === activePlaylistId ? ' active' : '');
-      t.innerHTML = `<span>${esc(pl.name)}</span><span style="font-size:10px;opacity:.7">${pl.videos.length}</span>`;
-      t.onclick = () => switchPlaylist(id);
-      tabs.appendChild(t);
-    });
-  }
-
-  function renderPlaylistItems() {
-    const pl = activePl();
-    const container = document.getElementById('playlistItems');
-    const header = document.getElementById('plHeader');
-    const plName = document.getElementById('plName');
-    const plCount = document.getElementById('plCount');
-    container.innerHTML = '';
-
-    if (!pl) return;
-
-    header.style.display = 'flex';
-    plName.textContent = pl.name;
-    plCount.textContent = `${pl.videos.length} vidéo${pl.videos.length !== 1 ? 's' : ''}`;
-
-    if (!pl.videos.length) {
-      container.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:24px 0">Aucune vidéo. Ajoutez-en depuis la recherche.</p>';
-      return;
-    }
-
-    pl.videos.forEach((video, index) => {
-      const isPlaying = video.id === currentVideoId;
-      const item = document.createElement('div');
-      item.className = 'pl-item' + (isPlaying ? ' playing' : '');
-      item.innerHTML = `
-        <img src="${esc(video.thumb)}" style="width:72px;height:48px;object-fit:cover;border-radius:5px;flex-shrink:0">
-        <div style="flex:1;min-width:0">
-          <div class="flex items-center gap-1.5 mb-1">
-            ${isPlaying ? `<div class="now-playing-dot" style="width:6px;height:6px"></div>` : `<span style="color:var(--muted);font-size:11px;flex-shrink:0">${index + 1}.</span>`}
-            <p class="line-clamp-1 text-xs font-medium">${esc(video.title)}</p>
-          </div>
-          <div class="flex gap-1.5 mt-1">
-            <button onclick="playVideo('${esc(video.id)}','${escQ(video.title)}');event.stopPropagation()" class="btn-red py-1 px-2 text-xs">▶ Lire</button>
-            <button onclick="removeFromPlaylist(${index});event.stopPropagation()" class="btn-ghost py-1 px-2 text-xs" style="color:#e84343">✕</button>
+    let totalDead=0, rows='';
+    Object.entries(playlists).forEach(([pid,pl])=>{
+      const dead=pl.videos.filter(v=>deadSet.has(String(v.id)));
+      totalDead+=dead.length;
+      rows+=`
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface2);border-radius:8px;gap:10px">
+          <div><p style="font-size:13px;font-weight:500">${esc(pl.name)}</p><p style="font-size:11px;color:var(--muted2)">${pl.videos.length} vidéo${pl.videos.length!==1?'s':''}</p></div>
+          <div style="text-align:right">${dead.length>0
+            ?`<p style="color:#f87171;font-size:12px">✗ ${dead.length} supprimée${dead.length>1?'s':''}</p>`
+            :`<p style="color:#4ade80;font-size:12px">✓ Aucune supprimée</p>`}
           </div>
         </div>`;
-      item.onclick = () => playVideo(video.id, video.title);
-      container.appendChild(item);
     });
 
-    // Progress bar
-    if (currentPlayingIndex >= 0 && pl.videos.length > 1) {
-      const bar = document.createElement('div');
-      bar.className = 'progress-bar';
-      bar.innerHTML = `<div class="progress-fill" style="width:${((currentPlayingIndex+1)/pl.videos.length*100).toFixed(1)}%"></div>`;
-      container.appendChild(bar);
-      const prog = document.createElement('p');
-      prog.style.cssText = 'font-size:11px;color:var(--muted);text-align:right;margin-top:4px';
-      prog.textContent = `${currentPlayingIndex+1} / ${pl.videos.length}`;
-      container.appendChild(prog);
-    }
+    res.innerHTML=`
+      <div style="margin-bottom:10px;padding:12px 14px;background:var(--surface2);border-radius:8px;font-size:13px;line-height:1.6">
+        <b>${removed.length.toLocaleString('fr-FR')}</b> vidéos supprimées dans la liste officielle.<br>
+        <span style="color:${totalDead>0?'#f87171':'#4ade80'}">${totalDead} vidéo${totalDead!==1?'s':''} affectée${totalDead!==1?'s':''} dans vos playlists.</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">${rows}</div>`;
+
+    if (totalDead>0) document.getElementById('btnRemoveDead').style.display='inline-flex';
+    renderPlaylistItems();
+  } catch(e) {
+    res.innerHTML='<p style="color:var(--red);font-size:13px">Erreur de connexion à l\'API.</p>';
   }
+  btn.disabled=false; btn.textContent='🩺 Relancer la vérification';
+}
 
-  // ─── Utils ────────────────────────────────────────────────────────────────
-  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
-  function escQ(s) { return String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+function removeDeadFromAll() {
+  if (!deadSet.size) return;
+  let n=0;
+  Object.values(playlists).forEach(pl=>{ const b=pl.videos.length; pl.videos=pl.videos.filter(v=>!deadSet.has(String(v.id))); n+=b-pl.videos.length; });
+  deadSet.clear(); save(); renderTabs(); renderPlaylistItems();
+  document.getElementById('btnRemoveDead').style.display='none';
+  document.getElementById('healthResult').insertAdjacentHTML('beforeend',`<p style="margin-top:10px;color:#4ade80;font-size:13px">✓ ${n} vidéo${n!==1?'s':''} retirée${n!==1?'s':''} des playlists.</p>`);
+  toast(`${n} vidéo${n!==1?'s':''} mortes retirées ✓`);
+}
 
-  let toastTimer;
-  function toast(msg) {
-    const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+// ══════════════════════════════════════════════════
+// AUTO-ADVANCE
+// ══════════════════════════════════════════════════
+let autoTm=null, autoLeft=0, autoDur=0, autoCancelled=false;
+const CIRC=100.5;
+function parseDur(s){ const p=String(s||'').split(':').map(Number); return p.length===3?p[0]*3600+p[1]*60+p[2]:p.length===2?p[0]*60+p[1]:p[0]||0 }
+function isAuto(){ return document.getElementById('autoToggle').checked }
+function onAutoChange(){ if(!isAuto()) cancelAuto() }
+
+async function startAuto(id) {
+  cancelAuto(); autoCancelled=false;
+  if (!isAuto()) return;
+  const pl=activePl();
+  if (!pl||currentIdx<0||currentIdx>=pl.videos.length-1) return;
+  let dur=0;
+  try { const d=await (await fetch(`https://www.eporner.com/api/v2/video/id/${id}/?format=json`)).json(); dur=parseDur((d.video||d).length||0); } catch{}
+  if (autoCancelled) return;
+  if (!dur||dur<5){ hideBanner(); return; }
+  const nv=pl.videos[currentIdx+1];
+  document.getElementById('nThumb').src=nv.thumb;
+  document.getElementById('nTitle').textContent=nv.title;
+  document.getElementById('nextBanner').classList.add('on');
+  autoDur=dur; autoLeft=dur; updateRing(dur,dur);
+  autoTm=setInterval(()=>{ autoLeft--; updateRing(autoLeft,autoDur); if(autoLeft<=0){ clearInterval(autoTm);autoTm=null;hideBanner();playNext(); } },1000);
+}
+function cancelAuto(){ autoCancelled=true; if(autoTm){clearInterval(autoTm);autoTm=null;} hideBanner(); }
+function hideBanner(){ document.getElementById('nextBanner').classList.remove('on'); document.getElementById('cNum').textContent='—'; document.getElementById('rFill').style.strokeDashoffset=CIRC; }
+function updateRing(left,total){
+  document.getElementById('rFill').style.strokeDashoffset=CIRC*(1-Math.max(0,left/total));
+  document.getElementById('cNum').textContent=left>3600?`${Math.floor(left/3600)}h`:left>60?`${Math.floor(left/60)}m`:`${left}s`;
+}
+
+// ══════════════════════════════════════════════════
+// PLAYER
+// ══════════════════════════════════════════════════
+function playVideo(id,title){
+  cancelAuto(); currentVid=id;
+  document.getElementById('playerWrap').style.display='block';
+  document.getElementById('videoPlayer').src=`https://www.eporner.com/embed/${id}`;
+  document.getElementById('videoTitle').textContent=title;
+  const pl=activePl(); if(pl) currentIdx=pl.videos.findIndex(v=>v.id===id);
+  renderPlaylistItems();
+  if(currentIdx>=0) startAuto(id);
+}
+function playAll(){ const pl=activePl(); if(!pl||!pl.videos.length) return toast('Playlist vide'); currentIdx=0; const v=pl.videos[0]; playVideo(v.id,v.title); }
+function playNext(){ const pl=activePl(); if(!pl) return; if(currentIdx<pl.videos.length-1){ currentIdx++; const v=pl.videos[currentIdx]; playVideo(v.id,v.title); } else toast('Fin de la playlist') }
+function playPrev(){ const pl=activePl(); if(!pl) return; if(currentIdx>0){ currentIdx--; const v=pl.videos[currentIdx]; playVideo(v.id,v.title); } else toast('Début de la playlist') }
+
+// ══════════════════════════════════════════════════
+// ADD DROPDOWN
+// ══════════════════════════════════════════════════
+function showAddDd(e,id,title,thumb){
+  e.stopPropagation();
+  const dd=document.getElementById('addDropdown'); dd.innerHTML='';
+  const rect=e.target.getBoundingClientRect();
+  Object.entries(playlists).forEach(([pid,pl])=>{
+    const already=pl.videos.some(v=>v.id===id);
+    const item=document.createElement('div'); item.className='dd-item';
+    item.innerHTML=`<span>${esc(pl.name)}</span>${already?'<span style="color:var(--muted2);font-size:11px">✓</span>':'<span style="color:var(--red);font-size:11px">+</span>'}`;
+    if(!already) item.onclick=()=>{ addToPlaylist(pid,id,title,thumb); closeDd(); };
+    else item.style.opacity='.4';
+    dd.appendChild(item);
+  });
+  const sep=document.createElement('div'); sep.style.cssText='height:1px;background:var(--border);margin:3px 0'; dd.appendChild(sep);
+  const ni=document.createElement('div'); ni.className='dd-item'; ni.style.color='var(--red)'; ni.textContent='+ Nouvelle playlist';
+  ni.onclick=()=>{ closeDd(); openCreateModal(id,title,thumb); }; dd.appendChild(ni);
+  dd.style.cssText=`top:${rect.bottom+4}px;left:${Math.min(rect.left,window.innerWidth-220)}px;display:block`;
+  setTimeout(()=>document.addEventListener('click',closeDd,{once:true}),10);
+}
+function closeDd(){ document.getElementById('addDropdown').style.display='none' }
+
+// ══════════════════════════════════════════════════
+// PLAYLIST CRUD
+// ══════════════════════════════════════════════════
+function openCreateModal(vid,vt,vth){ modalMode='create'; pendingAdd=vid?{id:vid,title:vt,thumb:vth}:null; document.getElementById('modalTitle').textContent='Nouvelle playlist'; document.getElementById('modalInput').value=''; document.getElementById('modalConfirm').textContent='Créer'; document.getElementById('modalConfirm').onclick=confirmCreate; document.getElementById('modal').style.display='flex'; setTimeout(()=>document.getElementById('modalInput').focus(),50); }
+function openRenameModal(){ const pl=activePl(); if(!pl) return; modalMode='rename'; document.getElementById('modalTitle').textContent='Renommer'; document.getElementById('modalInput').value=pl.name; document.getElementById('modalConfirm').textContent='Renommer'; document.getElementById('modalConfirm').onclick=confirmRename; document.getElementById('modal').style.display='flex'; setTimeout(()=>document.getElementById('modalInput').focus(),50); }
+function closeModal(){ document.getElementById('modal').style.display='none'; pendingAdd=null; }
+function confirmCreate(){ const name=document.getElementById('modalInput').value.trim(); if(!name) return; const id=uid(); playlists[id]={name,videos:[]}; activePlId=id; if(pendingAdd) addToPlaylist(id,pendingAdd.id,pendingAdd.title,pendingAdd.thumb,true); save(); renderTabs(); renderPlaylistItems(); closeModal(); toast(`Playlist « ${name} » créée ✓`); }
+function confirmRename(){ const name=document.getElementById('modalInput').value.trim(); if(!name||!activePl()) return; playlists[activePlId].name=name; save(); renderTabs(); renderPlaylistItems(); closeModal(); toast('Renommée ✓'); }
+function deleteCurrentPlaylist(){ const pl=activePl(); if(!pl) return; if(Object.keys(playlists).length===1){ clearCurrentPlaylist(); return; } if(!confirm(`Supprimer « ${pl.name} » ?`)) return; delete playlists[activePlId]; activePlId=Object.keys(playlists)[0]; save(); renderTabs(); renderPlaylistItems(); toast('Playlist supprimée'); }
+function addToPlaylist(pid,id,title,thumb,skipSave){ if(!playlists[pid]) return; if(playlists[pid].videos.some(v=>v.id===id)){ toast('Déjà dans cette playlist'); return; } playlists[pid].videos.push({id,title,thumb}); if(!skipSave){save();renderTabs();renderPlaylistItems();} toast(`Ajouté à « ${playlists[pid].name} » ✓`); }
+function removeFromPlaylist(i){ const pl=activePl(); if(!pl) return; pl.videos.splice(i,1); if(currentIdx>=i) currentIdx--; save(); renderPlaylistItems(); }
+function clearCurrentPlaylist(){ const pl=activePl(); if(!pl||!pl.videos.length) return; if(!confirm('Vider cette playlist ?')) return; pl.videos=[]; currentIdx=-1; save(); renderPlaylistItems(); }
+function switchPlaylist(id){ activePlId=id; currentIdx=-1; save(); renderTabs(); renderPlaylistItems(); }
+
+// ══════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════
+function renderTabs(){
+  const tabs=document.getElementById('playlistTabs'); tabs.innerHTML='';
+  Object.entries(playlists).forEach(([id,pl])=>{
+    const t=document.createElement('button'); t.className='pl-tab'+(id===activePlId?' active':'');
+    t.innerHTML=`<span class="lc1">${esc(pl.name)}</span><span style="font-size:10px;opacity:.7">${pl.videos.length}</span>`;
+    t.onclick=()=>switchPlaylist(id); tabs.appendChild(t);
+  });
+}
+
+function renderPlaylistItems(){
+  const pl=activePl(); const c=document.getElementById('playlistItems');
+  c.innerHTML='';
+  if(!pl) return;
+  document.getElementById('plName').textContent=pl.name;
+  document.getElementById('plCount').textContent=`${pl.videos.length} vidéo${pl.videos.length!==1?'s':''}`;
+  if(!pl.videos.length){ c.innerHTML='<p style="color:var(--muted2);font-size:12px;text-align:center;padding:20px 0">Aucune vidéo.<br>Ajoutez-en depuis la recherche.</p>'; return; }
+  pl.videos.forEach((v,i)=>{
+    const isPlaying=v.id===currentVid;
+    const isDead=deadLoaded&&deadSet.has(String(v.id));
+    const item=document.createElement('div');
+    item.className='pl-item'+(isPlaying?' playing':'')+(isDead?' dead':'');
+    item.innerHTML=`
+      ${isDead?'<div class="dead-badge">SUPPRIMÉE</div>':''}
+      <img src="${esc(v.thumb)}" style="width:65px;height:43px;object-fit:cover;border-radius:5px;flex-shrink:0">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px">
+          ${isPlaying?'<div class="dot-anim" style="width:6px;height:6px"></div>':`<span style="color:var(--muted2);font-size:10px;flex-shrink:0">${i+1}.</span>`}
+          <p class="lc1" style="font-size:11px;font-weight:500">${esc(v.title)}</p>
+        </div>
+        <div style="display:flex;gap:5px">
+          <button onclick="playVideo('${esc(v.id)}','${escQ(v.title)}');event.stopPropagation()" class="btn-red" style="padding:4px 8px;font-size:11px">▶</button>
+          <button onclick="removeFromPlaylist(${i});event.stopPropagation()" class="btn-ghost" style="padding:4px 8px;font-size:11px;color:#e84343">✕</button>
+        </div>
+      </div>`;
+    item.onclick=()=>playVideo(v.id,v.title);
+    c.appendChild(item);
+  });
+  if(currentIdx>=0&&pl.videos.length>1){
+    const bar=document.createElement('div'); bar.className='prog-bar';
+    bar.innerHTML=`<div class="prog-fill" style="width:${((currentIdx+1)/pl.videos.length*100).toFixed(1)}%"></div>`;
+    c.appendChild(bar);
+    const p=document.createElement('p'); p.style.cssText='font-size:10px;color:var(--muted2);text-align:right;margin-top:4px';
+    p.textContent=`${currentIdx+1} / ${pl.videos.length}`; c.appendChild(p);
   }
+}
 
-  // Enter to search
-  document.getElementById('searchInput').addEventListener('keypress', e => { if (e.key === 'Enter') searchVideos(); });
-  document.getElementById('modalInput').addEventListener('keypress', e => { if (e.key === 'Enter') document.getElementById('modalConfirm').click(); });
-  document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeModal(); });
+// ══════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;') }
+function escQ(s){ return String(s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;') }
+function fmtNum(n){ return Number(n).toLocaleString('fr-FR') }
+function fmtDate(d){ try{ return new Date(d).toLocaleDateString('fr-FR',{year:'2-digit',month:'short'}) }catch{ return String(d) } }
+
+let toastTm;
+function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(toastTm); toastTm=setTimeout(()=>el.classList.remove('show'),2600); }
+
+// Init
+renderTabs();
+renderPlaylistItems();
+document.getElementById('searchInput').addEventListener('keypress',e=>{ if(e.key==='Enter') searchVideos(1) });
+document.getElementById('lookupInput').addEventListener('keypress',e=>{ if(e.key==='Enter') lookupById() });
+document.getElementById('modalInput').addEventListener('keypress',e=>{ if(e.key==='Enter') document.getElementById('modalConfirm').click() });
+document.getElementById('modal').addEventListener('click',e=>{ if(e.target===document.getElementById('modal')) closeModal() });
 </script>
 </body>
 </html>
